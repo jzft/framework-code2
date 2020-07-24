@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.framework.concise</groupId>
+    <artifactId>concise</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>framework-activiti</artifactId>
+  <name>framework-activiti</name>
+  <properties>
+  	<activiti.version>5.23.0</activiti.version>
+  	<apollo-client.version>1.2.0</apollo-client.version>
+  </properties>
+  <dependencies>
+  		 <!-- Activiti 启动器 -->
+      <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring-boot-starter-basic</artifactId>
+            <version>${activiti.version}</version>
+        </dependency> 
+        
+    <!--       <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring-boot-starter-rest-api</artifactId>
+            <version>${activiti.version}</version>
+        </dependency> -->
+ 
+        <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-spring-boot-starter-actuator</artifactId>
+            <version>${activiti.version}</version>
+        </dependency>
+
+		<dependency>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+      </dependency>
+ 
+        <!-- Activiti 流程图 -->
+      <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-diagram-rest</artifactId>
+             <version>${activiti.version}</version>
+        </dependency> 
+        <!-- Activiti 在线设计 -->
+     <dependency>
+            <groupId>org.activiti</groupId>
+            <artifactId>activiti-modeler</artifactId>
+            <version>${activiti.version}</version>
+        </dependency> 
+        
+      <!--   <dependency>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-client</artifactId>
+            <version>${apollo-client.version}</version>
+        </dependency> -->
+        <dependency>
+			<groupId>com.framework.concise</groupId>
+			<artifactId>framework-dao</artifactId>
+		</dependency>
+	<!-- 	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency> -->
+		
+		<dependency>    
+	        <groupId>javax.servlet</groupId>    
+	        <artifactId>javax.servlet-api</artifactId>    
+	        <scope>provided</scope>    
+	    </dependency>
+  </dependencies>
+
+</project>

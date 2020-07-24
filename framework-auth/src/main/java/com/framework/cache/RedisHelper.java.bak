@@ -1,0 +1,271 @@
+/**
+ * 
+ */
+package com.framework.cache;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.framework.security.utils.redis.execption.RedisExecption;
+
+/**   
+ * @ClassName:  RedisHelper   
+ * @Description:TODO(这里用一句话描述这个类的作用)   
+ * @author: xuaj
+ * @date:   2018年2月8日 上午9:21:22   
+ *     
+ */
+public class RedisHelper {
+	private static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd hh:mm:ss").create();
+	 private static RedisTemplate redisTemplate;
+	 
+	 
+	 public static void set(final String key, final Object value, final Integer expireSeconds)
+	  {
+	    if ((StringUtils.isEmpty(key)) || (value == null)) {
+	      throw new RedisExecption("key或value不能为空");
+	    }
+	    redisTemplate.execute(new RedisCallback()
+	    {
+	      public Boolean doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          byte[] byteKey = RedisHelper.serialize(key);
+	          connection.setEx(byteKey, expireSeconds.intValue(), RedisHelper.serialize(value));
+	         // connection.setNX(byteKey, RedisHelper.serialize(value));
+	          //connection.set(byteKey, RedisHelper.serialize(value));
+	          //connection.expire(byteKey, expireSeconds.intValue());
+	          return Boolean.valueOf(true);
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 public static void setObj(final Object key, final Object value, final Integer expireSeconds)
+	  {
+	    if ((key == null) || (value == null)) {
+	      throw new RedisExecption("key或value不能为空");
+	    }
+	     redisTemplate.execute(new RedisCallback()
+	    {
+	      public Boolean doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          byte[] byteKey = RedisHelper.redisTemplate.getKeySerializer().serialize(key);
+	          connection.set(byteKey, RedisHelper.redisTemplate.getValueSerializer().serialize(value));
+	          connection.expire(byteKey, expireSeconds.intValue());
+	          return Boolean.valueOf(true);
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	  
+	 public static <T> T get(final String key, final Class<T> valClz)
+	  {
+	    if (StringUtils.isEmpty(key)) {
+	      throw new RedisExecption("key不能为空");
+	    }
+	    return (T) redisTemplate.execute(new RedisCallback()
+	    {
+	      public T doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          byte[] byteKey = RedisHelper.serialize(key);
+	          byte[] byteValue = connection.get(byteKey);
+	          return RedisHelper.unserialize(byteValue, valClz);
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 public static String getStr(final String key)
+	  {
+	    return (String)redisTemplate.execute(new RedisCallback()
+	    {
+	      public String doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          return (String)RedisHelper.redisTemplate.getStringSerializer().deserialize(connection
+	            .get(RedisHelper.redisTemplate.getStringSerializer().serialize(key)));
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 public static <T> T getObj(final Object key)
+	  {
+	    if (key == null) {
+	      throw new RedisExecption("key不能为空");
+	    }
+	    return (T) redisTemplate.execute(new RedisCallback()
+	    {
+	      public T doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          byte[] byteKey = RedisHelper.redisTemplate.getKeySerializer().serialize(key);
+	          byte[] byteValue = connection.get(byteKey);
+	          return (T) RedisHelper.redisTemplate.getValueSerializer().deserialize(byteValue);
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 public static Long del(final String key)
+			    throws RedisExecption
+			  {
+			    return (Long)redisTemplate.execute(new RedisCallback()
+			    {
+			      public Long doInRedis(RedisConnection connection)
+			        throws DataAccessException
+			      {
+			        try
+			        {
+			          return connection.del(new byte[][] { RedisHelper.serialize(key) });
+			        }
+			        catch (Exception e)
+			        {
+			          throw new RuntimeException(e);
+			        }
+			      }
+			    }, true);
+			  }
+	 public static List<Object> values(final String pattern)
+	  {
+	    return (List<Object>) redisTemplate.execute(new RedisCallback()
+	    {
+	      public List<Object> doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          Set<byte[]> keys = connection.keys(RedisHelper.serialize(pattern));
+	          if ((keys != null) && (!keys.isEmpty()))
+	          {
+	            List<Object> values = new ArrayList(keys.size());
+	            for (byte[] key : keys)
+	            {
+	              Object value = RedisHelper.unserialize(connection.get(key), null);
+	              if (value != null) {
+	                values.add(value);
+	              }
+	            }
+	            return Collections.unmodifiableList(values);
+	          }
+	          return Collections.emptyList();
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 
+	 public static Set<String> keys(final String pattern)
+	  {
+	    return (Set)redisTemplate.execute(new RedisCallback()
+	    {
+	      public Set<String> doInRedis(RedisConnection connection)
+	        throws DataAccessException
+	      {
+	        try
+	        {
+	          Set<byte[]> keybytes = connection.keys(RedisHelper.serialize(pattern));
+	          if ((keybytes == null) || (keybytes.isEmpty())) {
+	            return Collections.emptySet();
+	          }
+	          Set<String> set = new HashSet();
+	          for (byte[] keybyte : keybytes) {
+	            set.add(RedisHelper.unserialize(keybyte, String.class));
+	          }
+	          return set;
+	        }
+	        catch (Exception e)
+	        {
+	          throw new RuntimeException(e);
+	        }
+	      }
+	    }, true);
+	  }
+	 public static <T> T unserialize(byte[] bytes, Class<T> clz)
+	  {
+	    Object json = redisTemplate.getStringSerializer().deserialize(bytes);
+	    if (json == null) {
+	      return null;
+	    }
+	    if ((clz == null) || (clz.getName().equals("java.lang.String"))) {
+	      return (T) json;
+	    }
+	    return gson.fromJson(json.toString(), clz);
+	  }
+	 private static String getJsonStr(Object value)
+	  {
+	    String valStr = null;
+	    if (value == null) {
+	      valStr = null;
+	    }
+	    if ((value instanceof String)) {
+	      valStr = value.toString();
+	    } else if ((value instanceof Number)) {
+	      valStr = value + "";
+	    } else {
+	      valStr = gson.toJson(value);
+	    }
+	    return valStr;
+	  }
+	  public static byte[] serialize(Object value)
+	  {
+	    String valStr = getJsonStr(value);
+	    return redisTemplate.getStringSerializer().serialize(valStr);
+	  }
+
+	public static RedisTemplate getRedisTemplate() {
+		return redisTemplate;
+	}
+
+	public static void setRedisTemplate(RedisTemplate redisTemplate) {
+		//redisTemplate.setEnableTransactionSupport(true);
+		RedisHelper.redisTemplate = redisTemplate;
+	}
+	  
+	
+	  
+	  
+}

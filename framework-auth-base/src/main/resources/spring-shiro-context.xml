@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:util="http://www.springframework.org/schema/util" xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+        
+	<!-- Shiro生命周期处理器 保证实现了Shiro内部lifecycle函数的bean执行  --> 
+  <!--   <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" /> -->
+   <!-- 会话ID生成器 -->
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
+  	<bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator" />
+ 
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+      <property name="authenticator" ref="authenticator" />
+        <property name="sessionManager" ref="sessionManager" />
+        <property name="cacheManager" ref="redisCacheManager" />
+        <property name="rememberMeManager"><null/></property>
+        <property name="realms">
+            <list>
+                <ref bean="customRealm" />
+            </list>
+        </property>
+    </bean>
+    
+    
+    <bean id="sessionManager" class="com.framework.security.DeriveWebSessionManager">
+        <property name="sessionDAO" ref="redisShiroSessionDAO" />
+        <property name="deleteInvalidSessions" value="true"/>
+        <property name="sessionValidationSchedulerEnabled" value="false" />
+  		 <property name="sessionIdCookieEnabled" value="true"/>
+         <property name="sessionIdCookie" ref="sessionIdCookie" />
+    </bean>
+    
+    <bean class="com.framework.security.CustomAuthorizingRealm" id="customRealm">
+          <property name="credentialsMatcher" ref="hashedCredentialsMatcher" />
+          <property name="cacheManager" ref="redisCacheManager"/>
+		  <property name="authenticationCacheName" value="authenticationCache" /> 
+		  <property name="authorizationCacheName" value="authorizationCache" />
+		  <property name="testEnabled" value="${shiro.testEnabled}" />
+    </bean>
+    
+    <bean id="redisCacheManager" class="com.framework.security.RedisCacheManager"/><!-- 自定义cacheManager -->
+         
+	<bean id="zkRoleUriUpdateWatcher" class="com.framework.security.ZkRoleUriUpdateWatcher">
+		<constructor-arg value="${shiro.zookeeper.url}"/>
+		<constructor-arg value="${shiro.zookeeper.zkEnabled}"/>
+	</bean>
+    <bean id="shiroFilter" class="com.framework.security.ShiroFilterFactoryBean">
+        <!-- 调用我们配置的权限管理器 -->
+         <!-- 设定登出时，重定向到url，此处为login/login -->   
+        <property name="securityManager" ref="securityManager" />
+        <property name="redirectUrl" value ="${shiro.redirectUrl}" />
+        <property name="loginUrl" value="${shiro.loginUrl}" />
+        <property name="successUrl" value="${shiro.successUrl}" />
+        <property name="unauthorizedUrl" value="${shiro.unauthorizedUrl}" />
+        <property name="filterChainDefinitions">
+	        <value>  
+	             ${shiro.redirectUrl} = anon
+				 ${shiro.loginUrl} = authc
+                 /swagger-ui.html = anon
+                 /webjars/** = anon
+                 /swagger-resources/** = anon
+                 /v2/api-docs/** = anon
+	             /css/** = anon
+				 /js/** = anon 
+				 /img/** = anon 
+				 ${shiro.logout} = logout
+				 ${shiro.successUrl} = authc
+				 /login/info = authc
+				 /** = url
+	        </value>  
+   		 </property>
+	      <property name="filterClassNames">
+			<map> 
+			<entry key="url" value="com.framework.security.filter.UriAuthorizationFilter"/>
+			 <entry key="authc" value="com.framework.security.filter.FormAuthenticationFilter"/>
+		 	<!--  <entry key="user" value-ref="userFilter" /> -->
+		 	  <entry key="logout" value="org.apache.shiro.web.filter.authc.LogoutFilter" /> 
+		 	</map>
+		  </property>
+    </bean>
+    
+    <!-- 设定登出时，重定向到url，此处为login/login -->   
+<!--      <bean id="logoutFilter" class="org.apache.shiro.web.filter.authc.LogoutFilter">
+	  <property name="redirectUrl" value="/login/login" /> 
+	 </bean> -->
+	  
+	  
+	  <bean id="authcFilter" class="com.framework.security.filter.FormAuthenticationFilter" >
+	 	 <property name="sessionIdCookie" ref="sessionIdCookie" />
+	  </bean>
+	  <!--  <bean id="userFilter" class="com.framework.security.filter.UserFilter">
+	  <property name="sessionIdCookie" ref="sessionIdCookie" /> 
+	  </bean> -->
+    <!-- 相当于调用SecurityUtils.setSecurityManager(securityManager) -->
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod" value="org.apache.shiro.SecurityUtils.setSecurityManager"/>
+		<property name="arguments" ref="securityManager"/>
+	</bean>
+    <!-- 会话Cookie模板 -->
+    <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+       <constructor-arg value="sid"/> 
+        <property name="httpOnly" value="false"/>
+        <!-- 如果集群，请设置domain和path，这会影响到sessionid在cookie的设置，设错有问题时，cookie会出现在url中，如果url不存在sessionid -->
+       <property name="domain" value="${shiro.web.domain}"/>
+      <!--  <property name="path" value="${shiro.web.domain}"/> -->
+        <property name="maxAge" value="2592000"/>
+    </bean>
+    
+<!--     
+ <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <property name="httpOnly" value="true"/>
+        <property name="maxAge" value="2592000"/>30天
+    </bean> -->
+
+    <!-- rememberMe管理器 -->
+ <!--    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        rememberMe cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度（128 256 512 位）
+        <property name="cipherKey"
+                  value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>
+        <property name="cookie" ref="sessionIdCookie"/>
+    </bean>
+     -->
+
+    <bean id="redisShiroSessionDAO" class="com.framework.security.RedisSessionDao">
+    	<constructor-arg ref="redisCacheManager"/>
+    	<constructor-arg value="${shiro.session.timeout}"/>
+    </bean>
+   
+    <bean id="hashedCredentialsMatcher" class="com.framework.security.AESHashedMatcher"><!-- 密钥的算法 -->      
+        <property name="storedCredentialsHexEncoded" value="false" />
+        <property name="hashAlgorithmName" value="DES" />
+        <property name="encryptKey" value="${shiro.encryptKey}"/>
+        <property name="hashIterations" value="1" />
+    </bean>
+    
+      <!-- 若用户访问未经授权的页面，则跳转到notauth。这里的路径是jsp视图下的
+       例如@RequiresPermissions("manage")
+	  @RequestMapping(value = "/success")
+	  若用户没有manage权限，则会跳转到notauth页面
+   -->
+  <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.apache.shiro.authz.UnauthorizedException">notauth</prop>
+            </props>
+        </property>
+  </bean>
+  
+  <bean  class="com.framework.security.SecurityListener"/>
+ <!--  <bean class="com.framework.spring.SpringContextUtil"/> -->
+    
+</beans> 

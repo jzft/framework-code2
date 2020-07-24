@@ -1,0 +1,8 @@
+实现AbstractActivitiDataSourceConfig的activitiDataSource方法,并将此datasource注入spring
+如：
+	@ConfigurationProperties(prefix="activiti.datasource")
+	@Bean
+	public DataSource activitiDataSource() {
+		DataSource datasource = new  DruidDataSource();
+		return datasource;
+    }

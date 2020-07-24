@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.framework.auth.mapper.SecurityDao" >
+
+	<select id="selectRolesByUserId" parameterType="java.lang.Integer" resultType="com.framework.security.model.Role" >
+		select
+	    b.id, 
+	    b.description type,
+	    b.name roleCode, 
+	    b.name name
+	    from t_user_role a left join t_role b on b.id=a.role_id
+	    where a.user_id=${userId} and a.delete_flag=0 and b.delete_flag=0
+	</select>
+	
+	
+	
+	<select id="queryPermissionByRoleId"  resultType="com.framework.security.model.Permission">
+    select 
+    b.id, b.permission name, b.url uri
+    from t_role_permission a left join t_permission b on b.id=a.permission_id
+    where  a.delete_flag=0 and b.delete_flag=0 and a.role_id in 
+    <foreach item="item" collection="ids" separator="," open="(" close=")" index="">    
+          #{item,jdbcType=INTEGER}    
+    </foreach>
+  </select>
+</mapper>
