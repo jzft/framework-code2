@@ -55,6 +55,7 @@
         <mybatis-pagehelper.version>5.1.2</mybatis-pagehelper.version>
 		<tomcat.version>8.5.2</tomcat.version>
         <activiti-dependencies.version>7.1.213</activiti-dependencies.version>
+        <easy-captcha.version>1.6.2</easy-captcha.version>
     </properties>
 
     <dependencyManagement>
@@ -231,6 +232,11 @@
                 <version>${project.version}</version>
             </dependency>
 
+
+<dependency> <groupId>com.github.whvcse</groupId>
+            <artifactId>easy-captcha</artifactId>
+            <version>${easy-captcha.version}</version>
+        </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>

@@ -2,6 +2,7 @@ package com.framework.security;
 
 import com.framework.SpringContextUtil;
 import com.framework.cache.RedisHelper;
+import com.framework.security.exception.MyAuthenticationException;
 import com.framework.security.model.*;
 import com.framework.security.service.SecurityPermissionService;
 import com.framework.security.service.SecurityRoleService;
@@ -23,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +42,8 @@ import java.util.List;
 public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuthorization, Realm, InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(CustomAuthorizingRealm.class);
 
-    private boolean testEnabled = false;
+    private boolean isPersistCache = false;
+   
 
     //	   private boolean zkEnabled  = false;
     public CustomAuthorizingRealm() {
@@ -65,7 +69,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @Description: 获取权限
      * @param: @param principals
      * @param: @return
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午4:09:37
      */
     @Override
@@ -109,7 +113,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @Description: 加载用户权限
      * @param: @param username
      * @param: @return
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午4:09:54
      */
     @Override
@@ -139,7 +143,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
             ArrayList<Integer> list = new ArrayList<Integer>();
             list.add(role.getId());
             List<Permission> perms = permissionService.queryPermissionByRoleId(list);
-            if (this.testEnabled) {
+            if (!this.isPersistCache) {
                 SecurityFilterUtil.delFilterRoleUri(role.getName());
             }
             if (CollectionUtils.isNotEmpty(perms)) {
@@ -179,16 +183,26 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @Description: 登录认证
      * @param: @param token
      * @param: @return
-     * @param: @throws AuthenticationException
-     * @author join
+     * @param: @throws MyAuthenticationException
+     * @author lyq
      * @Date 2017年1月5日 下午4:10:21
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        UsernamePasswordToken upt = (UsernamePasswordToken) token;
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws MyAuthenticationException {
+       
+    	UsernamePasswordToken upt = (UsernamePasswordToken) token;
         AuthenticationInfo info = null;
         logger.info("doGetAuthenticationInfo start...");
         Subject subject = SecurityUtils.getSubject();
+        
+        if(token instanceof CaptchaToken){
+        	CaptchaToken captchaToken = ((CaptchaToken) token);
+        	String sessionCaptcha = (String)subject.getSession().getAttribute(captchaToken.getCaptchaSessionKey());
+        	if(StringUtils.isEmpty(captchaToken.getCaptcha())||StringUtils.isEmpty(sessionCaptcha)||!StringUtils.equals(captchaToken.getCaptcha(), sessionCaptcha)){
+        		//图形验证码不争取
+        		throw new  MyAuthenticationException("验证码不正确。");
+        	}
+        }
         logger.info("doGetAuthenticationInfo subject.getPrincipal():" + subject.getPrincipal() + "。。。");
 
         String principal = upt.getUsername();
@@ -196,8 +210,9 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
         logger.info("doGetAuthenticationInfo user:" + principal + "。。。");
         User user = userService.findUserByUserNum(principal);
         if (user == null) {
-            throw new AuthenticationException("未知的用户名或密码错误！");
+            throw new MyAuthenticationException("未知的用户名或密码错误！");
         }
+        
 
         // String randompwdattr=SecurityUtils.getSubject().getSession().getAttribute("RANDOMPWDATTR")+"";
         String randompwdattr = RedisHelper.getStr("RANDOMPWDATTR:" + principal);
@@ -239,7 +254,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @Description: 清除用户授权信息缓存.
      * @param: @param principal
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午4:10:35
      */
     public void clearCachedAuthorizationInfo(String principal) {
@@ -256,7 +271,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @param: @param roleIdentifier
      * @param: @param info
      * @param: @return
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午4:10:49
      */
     @Override
@@ -279,7 +294,7 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
      * @Description: 清除所有用户授权信息缓存.
      * @param:
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午4:11:03
      */
     public void clearAllCachedAuthorizationInfo() {
@@ -302,14 +317,14 @@ public class CustomAuthorizingRealm extends AuthorizingRealm implements LoadAuth
 //		}
 
 
-    public void setTestEnabled(boolean testEnabled) {
-        this.testEnabled = testEnabled;
-        this.setAuthorizationCachingEnabled(!testEnabled);
-        this.setAuthenticationCachingEnabled(!testEnabled);
+    public void setIsPersistCache(boolean isPersistCache) {
+        this.isPersistCache = isPersistCache;
+        this.setAuthorizationCachingEnabled(isPersistCache);
+        this.setAuthenticationCachingEnabled(isPersistCache);
     }
 
 
-    /**
+	/**
      * 是否是Ajax请求
      *
      * @param request

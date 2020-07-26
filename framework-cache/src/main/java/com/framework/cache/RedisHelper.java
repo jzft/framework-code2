@@ -151,7 +151,7 @@ public class RedisHelper {
      * @param: @param value
      * @param: @param expireSeconds   过期时间，单位：秒
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月6日 下午3:51:58
      */
     @SuppressWarnings("unchecked")
@@ -1691,7 +1691,7 @@ public class RedisHelper {
      * @param: @param key 键
      * @param: valClz 值类型
      * @return: T
-     * @author join
+     * @author lyq
      * @Date 2017年1月6日 下午3:56:18
      */
     @SuppressWarnings("unchecked")

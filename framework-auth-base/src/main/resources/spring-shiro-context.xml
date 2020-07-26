@@ -14,7 +14,13 @@ xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springfram
   <!--   <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" /> -->
    <!-- 会话ID生成器 -->
     <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
-  	<bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator" />
+  	<bean id="authenticator" class="org.apache.shiro.authc.pam.ModularRealmAuthenticator" >
+  		 <property name="authenticationListeners"> 
+            <list> 
+                <bean class="com.framework.security.listener.ErrorAuthenticationListener" />
+            </list> 
+        </property> 
+  	</bean>
  
     <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
       <property name="authenticator" ref="authenticator" />
@@ -42,7 +48,7 @@ xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springfram
           <property name="cacheManager" ref="redisCacheManager"/>
 		  <property name="authenticationCacheName" value="authenticationCache" /> 
 		  <property name="authorizationCacheName" value="authorizationCache" />
-		  <property name="testEnabled" value="${shiro.testEnabled}" />
+		  <property name="isPersistCache" value="${shiro.isPersistCache}" />
     </bean>
     
     <bean id="redisCacheManager" class="com.framework.security.RedisCacheManager"/><!-- 自定义cacheManager -->
@@ -76,6 +82,7 @@ xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springfram
 				 /** = url
 	        </value>  
    		 </property>
+   		  <property name="captchaSessionKey" value="${shiro.captchaSessionKey}"/>
 	      <property name="filterClassNames">
 			<map> 
 			<entry key="url" value="com.framework.security.filter.UriAuthorizationFilter"/>
@@ -92,9 +99,10 @@ xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springfram
 	 </bean> -->
 	  
 	  
-	  <bean id="authcFilter" class="com.framework.security.filter.FormAuthenticationFilter" >
+	<!--   <bean id="authcFilter" class="com.framework.security.filter.FormAuthenticationFilter" >
 	 	 <property name="sessionIdCookie" ref="sessionIdCookie" />
-	  </bean>
+	 	 <property name="captchaSessionKey" value="${shiro.captchaSessionKey}"/>
+	  </bean> -->
 	  <!--  <bean id="userFilter" class="com.framework.security.filter.UserFilter">
 	  <property name="sessionIdCookie" ref="sessionIdCookie" /> 
 	  </bean> -->

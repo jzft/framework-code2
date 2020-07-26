@@ -32,6 +32,7 @@ public class ShiroFilterFactoryBeanProxy extends ShiroFilterFactoryBean {
 		this.setFilterChainDefinitionMap(shiroFilterFactoryBean.getFilterChainDefinitionMap());
 		this.initFilterChainDefinitionMap = shiroFilterFactoryBean.initFilterChainDefinitionMap;
 		this.setSecurityManager(shiroFilterFactoryBean.getSecurityManager());
+		this.setCaptchaSessionKey(shiroFilterFactoryBean.getCaptchaSessionKey());
 		this.setFilterClassNames(shiroFilterFactoryBean.getFilterClassNames());
 //		Filter logoutFilter = SpringContextUtil.getBean(Filter.class,"logoutFilter");
 //		filters.put("logout", logoutFilter);

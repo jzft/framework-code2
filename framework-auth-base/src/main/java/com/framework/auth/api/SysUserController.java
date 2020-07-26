@@ -45,7 +45,7 @@ public class SysUserController {
      * @param userInfoDTO 用户信息
      * @return 用户id
      */
-    @PostMapping("")
+    @PostMapping("register")
     @ApiOperation(value = "添加用户")
     public ResultVo<Integer> add(@Valid @RequestBody UserInfoDTO userInfoDTO, Errors errors) {
         if (StringUtils.isEmpty(userInfoDTO.getPassword())) {

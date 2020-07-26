@@ -1,7 +1,7 @@
 package com.framework.security.model;
 
 /**
- * @author join
+ * @author lyq
  * @version V1.0
  * @ClassName: Uri.java
  * @Description: 权限Uri类
@@ -160,7 +160,7 @@ public class Uri {
      * @Description: permission加载
      * @param: @param permission
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月6日 上午9:09:13
      */
     public void load(Permission permission) {

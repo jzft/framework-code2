@@ -20,7 +20,7 @@ public class ShiroFilterFactoryBean extends org.apache.shiro.spring.web.ShiroFil
 	public static ShiroFilterFactoryBean instance = null;
 	Map<String,String>filterClassNames = new HashMap<String,String>();
 	protected Map<String,String> initFilterChainDefinitionMap = new HashMap<>();
-	
+	private String captchaSessionKey = null;
 	
 	
 	
@@ -66,6 +66,14 @@ public class ShiroFilterFactoryBean extends org.apache.shiro.spring.web.ShiroFil
 	}*/
 
 
+	public String getCaptchaSessionKey() {
+		return captchaSessionKey;
+	}
+
+	public void setCaptchaSessionKey(String captchaSessionKey) {
+		this.captchaSessionKey = captchaSessionKey;
+	}
+
 	public void setFilterClassNames(Map<String, String> filterClassNames) {
 		this.filterClassNames = filterClassNames;
 		if(filterClassNames==null||filterClassNames.size()==0){
@@ -93,6 +101,7 @@ public class ShiroFilterFactoryBean extends org.apache.shiro.spring.web.ShiroFil
 						if(sessionManager!=null){
 							if(f instanceof FormAuthenticationFilter){
 								((FormAuthenticationFilter)f).setSessionIdCookie(sessionManager.getSessionIdCookie());
+								((FormAuthenticationFilter)f).setCaptchaSessionKey(captchaSessionKey);
 							}
 						}
 						filters.put(key, f);

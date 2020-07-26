@@ -8,8 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.servlet.Cookie;
 
+import com.framework.security.CaptchaToken;
 import com.framework.security.ShiroFilterFactoryBean;
 
 /**
@@ -22,8 +24,8 @@ import com.framework.security.ShiroFilterFactoryBean;
  */
 public class FormAuthenticationFilter extends org.apache.shiro.web.filter.authc.FormAuthenticationFilter {
 
-	  private Cookie sessionIdCookie;
-	    
+	  	private Cookie sessionIdCookie;
+	  	 private String captchaSessionKey = null;
 	    public Cookie getSessionIdCookie() {
 	        return sessionIdCookie;
 	    }
@@ -32,6 +34,21 @@ public class FormAuthenticationFilter extends org.apache.shiro.web.filter.authc.
 	    public void setSessionIdCookie(Cookie sessionIdCookie) {
 	        this.sessionIdCookie = sessionIdCookie;
 	    }
+
+	    @Override
+	    protected AuthenticationToken createToken(String username, String password,
+                boolean rememberMe, String host){
+	    	AuthenticationToken taken = null;
+	    	 if(StringUtils.isNotEmpty(this.captchaSessionKey)&&!StringUtils.equals(this.captchaSessionKey, "false")){
+	         	//验证码
+	    		String captcha = (String)SecurityUtils.getSubject().getSession().getAttribute(this.captchaSessionKey);
+	         	taken = new CaptchaToken(username, password, rememberMe, host,this.captchaSessionKey,captcha);
+		    }else{
+		    	taken = super.createToken(username, password, rememberMe, host);
+		    }
+	    	return taken;
+	    }
+	    
 
 
 	    @Override
@@ -52,13 +69,6 @@ public class FormAuthenticationFilter extends org.apache.shiro.web.filter.authc.
 	     */
 	    @Override
 	    protected void issueSuccessRedirect(ServletRequest request, ServletResponse response) throws Exception {
-//	        String sessionid = sessionIdCookie.readValue(WebUtils.toHttp(request), WebUtils.toHttp(response));
-	        // clear JSESSIONID in URL if session id is not null 
-//	        if(sessionid != null){
-//	            request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_SOURCE,ShiroHttpServletRequest.COOKIE_SESSION_ID_SOURCE);
-//	            request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID, sessionid);
-//	            request.setAttribute(ShiroHttpServletRequest.REFERENCED_SESSION_ID_IS_VALID, Boolean.TRUE);
-//	        }
 	    	this.setSessionIdCookie(sessionIdCookie);
 	        super.issueSuccessRedirect(request, response);
 	    }
@@ -91,11 +101,19 @@ public class FormAuthenticationFilter extends org.apache.shiro.web.filter.authc.
 	    	if(StringUtils.equalsIgnoreCase(ShiroFilterFactoryBean.instance.getLoginUrl(), requestURI)){
 				 return false;
 			 }
-	    	this.getSessionIdCookie();
-	    	 org.apache.shiro.subject.Subject subject = SecurityUtils.getSubject();
+//	    	this.getSessionIdCookie();
+//	    	 org.apache.shiro.subject.Subject subject = SecurityUtils.getSubject();
 	    	return super.isAccessAllowed(request, response, mappedValue);
 	    }
 	   
 
+		public String getCaptchaSessionKey() {
+			return captchaSessionKey;
+		}
+
+
+		public void setCaptchaSessionKey(String captchaSessionKey) {
+			this.captchaSessionKey = captchaSessionKey;
+		}
 
 }

@@ -39,7 +39,7 @@ public class SecurityFilterUtil {
      * @Description: 往shiro拦截器里面增加角色
      * @param: @param roleRri
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午5:01:39
      */
     public static void addFilterRoleBean(RoleUri roleRri) throws JsonParseException, JsonMappingException, IOException {
@@ -113,7 +113,7 @@ public class SecurityFilterUtil {
      * @param: @param roleCode
      * @param: @param uri
      * @return: void
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午5:02:56
      */
     public static void delFilterRoleUri(String roleCode, String uri) throws JsonParseException, JsonMappingException, IOException {
@@ -192,7 +192,7 @@ public class SecurityFilterUtil {
      * @Description: 获取shiro拦截器中的角色url配置
      * @param: @return
      * @return: Map<String, String>
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午5:03:11
      */
     public static Map<String, String> getFilterChainDefinitionMap() {
@@ -227,7 +227,7 @@ public class SecurityFilterUtil {
      * @param: @param uri
      * @param: @return
      * @return: boolean
-     * @author join
+     * @author lyq
      * @Date 2017年1月5日 下午5:03:28
      */
     public static boolean containRoleUriMap(String roleCode, String uri) throws JsonParseException, JsonMappingException, IOException {
