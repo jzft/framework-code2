@@ -67,6 +67,7 @@ xmlns:p="http://www.springframework.org/schema/p" xmlns:c="http://www.springfram
         <property name="unauthorizedUrl" value="${shiro.unauthorizedUrl}" />
         <property name="filterChainDefinitions">
 	        <value>  
+	        	/login/captcha = anon
 	             ${shiro.redirectUrl} = anon
 				 ${shiro.loginUrl} = authc
                  /swagger-ui.html = anon

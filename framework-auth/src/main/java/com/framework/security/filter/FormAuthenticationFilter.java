@@ -1,5 +1,7 @@
 package com.framework.security.filter;
 
+import java.util.Enumeration;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -36,15 +38,19 @@ public class FormAuthenticationFilter extends org.apache.shiro.web.filter.authc.
 	    }
 
 	    @Override
-	    protected AuthenticationToken createToken(String username, String password,
-                boolean rememberMe, String host){
+	    protected AuthenticationToken createToken(ServletRequest request, ServletResponse response){
 	    	AuthenticationToken taken = null;
 	    	 if(StringUtils.isNotEmpty(this.captchaSessionKey)&&!StringUtils.equals(this.captchaSessionKey, "false")){
+	    		 String username = getUsername(request);
+	    	     String password = getPassword(request);
+	    	     boolean rememberMe = isRememberMe(request);
+	    	     String host = getHost(request);
+	    	     Enumeration<String> a = request.getParameterNames();
 	         	//验证码
-	    		String captcha = (String)SecurityUtils.getSubject().getSession().getAttribute(this.captchaSessionKey);
+	    		String captcha = (String)request.getParameter(this.captchaSessionKey);
 	         	taken = new CaptchaToken(username, password, rememberMe, host,this.captchaSessionKey,captcha);
 		    }else{
-		    	taken = super.createToken(username, password, rememberMe, host);
+		    	taken = super.createToken(request,response);
 		    }
 	    	return taken;
 	    }
