@@ -2,6 +2,7 @@ package com.framework.auth.service;
 
 
 
+import com.framework.auth.pojo.dto.user.RegisterUserDTO;
 import com.framework.auth.pojo.dto.user.UserInfoDTO;
 import com.framework.auth.pojo.dto.user.UserRoleInfoDTO;
 import com.framework.auth.pojo.entity.RoleEntity;
@@ -43,5 +44,12 @@ public interface UserService {
      * @return 角色列表
      */
     List<RoleEntity> getUserRoles(Integer userId);
+
+    /**
+     * 
+     * @param dto
+     * @return
+     */
+	RegisterUserDTO register(RegisterUserDTO dto);
 
 }

@@ -3,6 +3,7 @@ package com.framework.auth.service.impl;
 
 import com.framework.auth.mapper.RoleEntityMapper;
 import com.framework.auth.mapper.UserEntityMapper;
+import com.framework.auth.pojo.dto.user.RegisterUserDTO;
 import com.framework.auth.pojo.dto.user.UserInfoDTO;
 import com.framework.auth.pojo.dto.user.UserRoleInfoDTO;
 import com.framework.auth.pojo.entity.RoleEntity;
@@ -60,6 +61,18 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRoleService userRoleService;
 
+    @Override
+    @Transactional
+    public RegisterUserDTO register(RegisterUserDTO dto){
+    	Integer userId = this.saveOrUpdateUser(dto.getUserInfo());
+    	
+    	UserRoleInfoDTO userRoleInfoDTO = new UserRoleInfoDTO();
+    	userRoleInfoDTO.setRoleIds(dto.getRoleIds());
+    	userRoleInfoDTO.setUserId(userId);
+		this.rebindingRole_(userRoleInfoDTO );
+    	return dto;
+    }
+    
     /**
      * 保存或者更新用户信息
      * 不包含参数校验
@@ -71,28 +84,32 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Integer saveOrUpdate(UserInfoDTO userInfo) {
         return RedisHelper.ignoreExec(() -> {
-            UserEntity entity = new UserEntity();
-            entity.setNickName(userInfo.getNickName());
-            entity.setId(userInfo.getId());
-            entity.setUserName(userInfo.getUsername());
-            entity.setParentId(userInfo.getParentId());
-            entity.setType(userInfo.getType());
-            if (!StringUtils.isEmpty(userInfo.getPassword())) {
-                try {
-                    String encryptPwd = hashedCredentialsMatcher.aesEncrypt(userInfo.getPassword(), hashedCredentialsMatcher.getEncryptKey());
-                    entity.setPwd(encryptPwd);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (entity.getId() != null) {
-                userEntityMapper.updateByPrimaryKey(entity);
-            } else {
-                userEntityMapper.insertSelective(entity);
-            }
-            return entity.getId();
+            return saveOrUpdateUser(userInfo);
         }, KeyConstants.ACTION_USER_MODIFY_KEY + userInfo.getUsername(), expireTime);
     }
+
+	private Integer saveOrUpdateUser(UserInfoDTO userInfo) {
+		UserEntity entity = new UserEntity();
+		entity.setNickName(userInfo.getNickName());
+		entity.setId(userInfo.getId());
+		entity.setUserName(userInfo.getUsername());
+		entity.setParentId(userInfo.getParentId());
+		entity.setType(userInfo.getType());
+		if (!StringUtils.isEmpty(userInfo.getPassword())) {
+		    try {
+		        String encryptPwd = hashedCredentialsMatcher.aesEncrypt(userInfo.getPassword(), hashedCredentialsMatcher.getEncryptKey());
+		        entity.setPwd(encryptPwd);
+		    } catch (Exception e) {
+		        throw new RuntimeException(e);
+		    }
+		}
+		if (entity.getId() != null) {
+		    userEntityMapper.updateByPrimaryKey(entity);
+		} else {
+		    userEntityMapper.insertSelective(entity);
+		}
+		return entity.getId();
+	}
 
     /**
      * 通过id查询用户信息
@@ -114,20 +131,25 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void rebindingRoles(UserRoleInfoDTO userRoleInfoDTO) {
         RedisHelper.ignoreExec(() -> {
-            /*清除旧的数据*/
-            userRoleService.clearByUserId(userRoleInfoDTO.getUserId());
-            /*添加新数据*/
-            List<UserRoleEntity> result = new LinkedList<>();
-            for (Integer roleId : userRoleInfoDTO.getRoleIds()) {
-                UserRoleEntity entity = new UserRoleEntity();
-                entity.setRoleId(roleId);
-                entity.setUserId(userRoleInfoDTO.getUserId());
-                result.add(entity);
-            }
-            userRoleService.saveBatch(result);
+            rebindingRole_(userRoleInfoDTO);
             return null;
         }, KeyConstants.ACTION_USER_ROLE_BIND_KEY + userRoleInfoDTO.getUserId(), expireTime);
     }
+
+	private void rebindingRole_(UserRoleInfoDTO userRoleInfoDTO) {
+		/*清除旧的数据*/
+		userRoleService.clearByUserId(userRoleInfoDTO.getUserId());
+		/*添加新数据*/
+		List<UserRoleEntity> result = new LinkedList<>();
+		for (Integer roleId : userRoleInfoDTO.getRoleIds()) {
+		    UserRoleEntity entity = new UserRoleEntity();
+		    entity.setRoleId(roleId);
+		    entity.setUserId(userRoleInfoDTO.getUserId());
+		    result.add(entity);
+		}
+		userRoleService.saveBatch(result);
+	}
+    
 
     /**
      * 获取指定用户的角色

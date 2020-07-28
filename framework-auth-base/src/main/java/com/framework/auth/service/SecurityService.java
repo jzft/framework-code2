@@ -27,4 +27,5 @@ public interface SecurityService {
 	List<Role> queryRolesByUserId(Integer userId);
 	User findUserByUserNum(String username) ;
 	boolean addRolePermission(RoleEntity role, PermissionEntity permission);
+	
 }

@@ -2,7 +2,7 @@ package com.ddd.dao.dialect;
 
 /**
  * 
- * @author Administrator
+ * @author lyq
  *
  */
 public class MySQLDialect extends Dialect{

@@ -22,4 +22,5 @@ public interface SecurityUserService {
 	
 	public boolean delUserRole(User user,Role role);
 	
+	
 }

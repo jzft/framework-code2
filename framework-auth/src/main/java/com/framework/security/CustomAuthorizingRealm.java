@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Administrator
+ * @author lyq
  * @version V1.0
  * @ClassName: CustomAuthorizingRealm.java
  * @Description: 授权类

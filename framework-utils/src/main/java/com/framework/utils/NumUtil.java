@@ -4,7 +4,7 @@ package com.framework.utils;
 
 /**
  * 
- * @author Giants
+ * @author lyqs
  *
  */
 public class NumUtil {

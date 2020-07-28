@@ -3,7 +3,7 @@ package com.framework.security;
 
 /**
  *@Description: redis存储特殊对象存储代理
- *@author Administrator
+ *@author lyq
  *
  * @param <T>
  */

@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
  * Class帮助类
  * <p>类全名称转换为对象
  * <p>将bean对象属c性注入值
- * @author Giant
+ * @author lyq
  */
 public class ClassUtils {
 	protected static Logger logger = Logger.getLogger(ClassUtils.class);
@@ -216,7 +216,7 @@ public class ClassUtils {
      *  
      * 尽量确保对list里面的对象正确执行obj里面的方法mthod 
      * 每次方法执行错误，重新支持，如果错误尝试executeCount次
-	 * @author Giant
+	 * @author lyq
      * @param list
      * @param obj
      * @param method
@@ -349,7 +349,7 @@ public class ClassUtils {
 		}
 		
 		/**
-		 * @author Giant
+		 * @author lyq
 		 * @param dest
 		 * @param orig
 		 * @throws Exception

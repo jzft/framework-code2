@@ -17,7 +17,7 @@ import com.framework.security.service.SecurityRoleService;
 
 
 /**
- * @author Administrator
+ * @author lyq
  * @version V1.0
  * @ClassName: SecurityFilterUtil.java
  * @Description: 安全过滤器

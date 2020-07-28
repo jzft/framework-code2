@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * 使用正则表达式
  * 
- * @author Giant
+ * @author lyq
  *
  */
 public class RegUtil {
