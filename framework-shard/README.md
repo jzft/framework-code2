@@ -34,6 +34,7 @@ parent.datasource.initialSize=0<br/><br/>
 
 batis.typeAliasesPackage=com.company.example.pojo<br/>
 batis.mapperLocations=classpath*:mybatis/mapper/*.xml<br/>
+batis.basePackages=com.company.example.mapper
 
 ###第三步：将配置注入AbsShardDbConfig子类，是切片配置生效（项目初始化）
 * 如：
