@@ -10,10 +10,10 @@ import org.apache.shiro.web.filter.mgt.NamedFilterList;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.framework.SpringContextUtil;
 import com.framework.security.model.RoleUri;
 import com.framework.security.model.Uri;
 import com.framework.security.service.SecurityRoleService;
+import com.framework.spring.utils.SpringContextUtil;
 
 
 /**

@@ -1,0 +1,56 @@
+package com.framework.shard;
+
+
+import java.util.Map;
+import java.util.Stack;
+
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+import com.framework.shard.TranHolder;
+
+
+/**
+ * 使用动态数据源实现分库选择数据源
+ * @author lyq
+ *
+ */
+public class DynamicDataSource extends AbstractRoutingDataSource {
+	
+	private Map<String,ShardDataSource> targetDataSources;
+	private ShardDataSource defaultTargetDataSource;
+	/* (non-Javadoc)
+	 * @see org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource#determineCurrentLookupKey()
+	 */
+	protected Object determineCurrentLookupKey() {
+		Stack<String> stack = TranHolder.shadeStack.get();
+		if(stack!=null){
+			return stack.peek();
+		}else{
+			return defaultTargetDataSource.getKey();
+		}
+	}
+
+	/**
+	 * @param myDataSources
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void setTargetDataSources(Map<Object, Object> targetDataSources) {
+		super.setTargetDataSources(targetDataSources);
+		this.targetDataSources = (Map)targetDataSources;
+	}
+
+	public Map<String, ShardDataSource> getTargetDataSources() {
+		return targetDataSources;
+	}
+	
+	@Override
+	public void setDefaultTargetDataSource(Object targetDataSource){
+		this.defaultTargetDataSource = (ShardDataSource) targetDataSource;
+		super.setDefaultTargetDataSource(targetDataSource);
+	}
+
+	public ShardDataSource getDefaultTargetDataSource() {
+		return defaultTargetDataSource;
+	}
+}

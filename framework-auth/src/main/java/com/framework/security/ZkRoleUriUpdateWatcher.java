@@ -17,7 +17,7 @@ import org.apache.zookeeper.ZooKeeper.States;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.framework.SpringContextUtil;
+import com.framework.spring.utils.SpringContextUtil;
 
 
 

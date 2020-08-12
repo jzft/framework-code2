@@ -31,7 +31,7 @@ import java.util.List;
  * @author casper
  */
 @RestController
-@RequestMapping("/sys/user")
+@RequestMapping("/user")
 @Api(description = "系统用户接口")
 public class SysUserController {
 

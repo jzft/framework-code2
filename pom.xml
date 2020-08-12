@@ -23,6 +23,7 @@
         <module>framework-auth-base</module>
         <module>framework-cloud-zuul</module>
         <module>framework-import-excel</module>
+        <module>framework-shard</module>
     </modules>
     <properties>
         <jdk.version>1.8</jdk.version>
@@ -231,12 +232,17 @@
                 <artifactId>framework-import-excel</artifactId>
                 <version>${project.version}</version>
             </dependency>
+			<dependency>
+                <groupId>com.framework.concise</groupId>
+                <artifactId>framework-shard</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-
-<dependency> <groupId>com.github.whvcse</groupId>
-            <artifactId>easy-captcha</artifactId>
-            <version>${easy-captcha.version}</version>
-        </dependency>
+			<dependency>
+				<groupId>com.github.whvcse</groupId>
+	            <artifactId>easy-captcha</artifactId>
+	            <version>${easy-captcha.version}</version>
+	        </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>

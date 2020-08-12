@@ -1,12 +1,13 @@
 package com.framework.security;
 
-import com.framework.SpringContextUtil;
 import com.framework.cache.RedisHelper;
 import com.framework.security.exception.MyAuthenticationException;
 import com.framework.security.model.*;
 import com.framework.security.service.SecurityPermissionService;
 import com.framework.security.service.SecurityRoleService;
 import com.framework.security.service.SecurityUserService;
+import com.framework.spring.utils.SpringContextUtil;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;

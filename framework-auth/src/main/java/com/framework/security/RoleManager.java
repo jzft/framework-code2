@@ -8,7 +8,6 @@ import org.apache.shiro.SecurityUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.framework.SpringContextUtil;
 import com.framework.security.model.Permission;
 import com.framework.security.model.Role;
 import com.framework.security.model.RoleUri;
@@ -16,6 +15,7 @@ import com.framework.security.model.Uri;
 import com.framework.security.service.SecurityPermissionService;
 import com.framework.security.service.SecurityRoleService;
 import com.framework.security.service.SecurityUserService;
+import com.framework.spring.utils.SpringContextUtil;
 
 
 /**
