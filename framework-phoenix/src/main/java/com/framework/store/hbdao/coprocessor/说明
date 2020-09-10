@@ -1,0 +1,5 @@
+1. disable ‘testTable’
+2. alter ‘testTable’, METHOD=>’table_att’,’coprocessor’=>’hdfs:///demo/test.jar|com.dengchuanhua.testhbase.TestCoprocessor|1001′
+3. enable ‘testTable’
+
+#暂时不建议使用hbase协处理器。

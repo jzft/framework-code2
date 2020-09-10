@@ -125,6 +125,11 @@ public class DateUtil {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		return df.parse(dataStr);
 	}
+	
+	public static Date stringToDate(String dataStr,String format) throws ParseException {
+		SimpleDateFormat df = new SimpleDateFormat(format);
+		return df.parse(dataStr);
+	}
 
 	/**
 	 * yyyy-MM-dd HH:mm
@@ -210,6 +215,15 @@ public class DateUtil {
 		}
 		return "";
 	}
+	
+	public static String dateToString(Date date,String format) {
+		if (date != null) {
+			SimpleDateFormat df = new SimpleDateFormat(format);
+			return df.format(date);
+		}
+		return "";
+	}
+
 
 	/**
 	 * yyyy-MM-dd HH:mm:ss.SSS date类型转化为带毫秒的指定的字符串类型格式
@@ -707,9 +721,6 @@ public class DateUtil {
 
 	}
 	
-	public static Date StringToDate(String fro, String dateStr) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 }

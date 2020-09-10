@@ -3,15 +3,16 @@ package com.framework.shard;
 import com.alibaba.druid.pool.DruidDataSource;
 
 /**
- * 自定义切片数据源
+ * 继承DruidDataSource，自定义数据源，增加切片属性
  * @author lyq
- *
+ * @date 2020年8月14日 下午7:43:06
  */
 @SuppressWarnings("serial")
 public class ShardDataSource extends DruidDataSource {
 	private String scope;//数据库分库字段映射范围
 	private String key;//数据源target值。
 	public String getScope() {
+		
 		return scope;
 	}
 

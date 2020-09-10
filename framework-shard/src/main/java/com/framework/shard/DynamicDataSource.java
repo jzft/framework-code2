@@ -11,8 +11,9 @@ import com.framework.shard.TranHolder;
 
 /**
  * 使用动态数据源实现分库选择数据源
+ * 
  * @author lyq
- *
+ * @date 2020年8月14日 下午7:39:26
  */
 public class DynamicDataSource extends AbstractRoutingDataSource {
 	
@@ -30,16 +31,12 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 		}
 	}
 
-	/**
-	 * @param myDataSources
-	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void setTargetDataSources(Map<Object, Object> targetDataSources) {
 		super.setTargetDataSources(targetDataSources);
 		this.targetDataSources = (Map)targetDataSources;
 	}
-
 	public Map<String, ShardDataSource> getTargetDataSources() {
 		return targetDataSources;
 	}

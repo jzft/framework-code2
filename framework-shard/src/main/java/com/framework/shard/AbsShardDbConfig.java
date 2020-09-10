@@ -29,9 +29,9 @@ import com.github.pagehelper.PageInterceptor;
 
 /**
  * 
- * 如果要横向分库，spring容器注入该配置
- * @author Administrator
- *
+ *  如果要横向分库，spring容器注入该配置
+ * @author lyq
+ * @date 2020年8月14日 下午7:35:48
  */
 public class AbsShardDbConfig {
 	
@@ -79,6 +79,7 @@ public class AbsShardDbConfig {
 		return dynamic;
     }
 	
+	
 	@ConfigurationProperties(prefix = "shard.datasource")
     @Bean
     public Map<String, String> shardProps() {
@@ -101,7 +102,6 @@ public class AbsShardDbConfig {
     }
     
 
-
     private void initDataSource(DataSource datasource, Map<String, String> props) {
         Set<String> keys = props.keySet();
         for (String key : keys) {
@@ -120,7 +120,14 @@ public class AbsShardDbConfig {
 
 
     /**
-     * 根据数据源创建SqlSessionFactory
+     * 
+     * 
+     * TODO
+     * @author lyq
+     * @date 2020年8月14日 下午7:37:50 
+     * @param ds
+     * @return
+     * @throws Exception
      */
     @Bean(name = "shardSqlSessionFactory")
     public SqlSessionFactory shardSqlSessionFactory(@Qualifier("datashard") DataSource ds) throws Exception {

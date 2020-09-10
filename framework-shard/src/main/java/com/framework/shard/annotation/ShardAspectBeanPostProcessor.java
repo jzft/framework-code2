@@ -22,10 +22,9 @@ import org.springframework.stereotype.Component;
 import com.framework.shard.aop.TransAop;
 
 /**
- * 
- *  不能用废弃，修改注解后不生效
+ *  用于修改aop中指定生效范围的注解；该类证实不能用，废弃，修改注解后不生效
  * @author lyq
- *
+ * @date 2020年8月14日 下午7:45:48
  */
 @Deprecated
 //@Component

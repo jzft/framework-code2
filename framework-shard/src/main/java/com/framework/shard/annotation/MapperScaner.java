@@ -9,7 +9,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.mybatis.spring.mapper.MapperFactoryBean;
-import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.Import;
 
@@ -17,9 +16,9 @@ import com.framework.shard.MapperScannerRegistrar;
 
 /**
  * 参考org.mybatis.spring.annotation.MapperScan
- * basePackages支持注解
+ * 使MapperScan的属性basePackages支持注解
  * @author lyq
- *
+ * @date 2020年8月14日 下午7:44:30
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

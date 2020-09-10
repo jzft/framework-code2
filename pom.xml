@@ -24,6 +24,7 @@
         <module>framework-cloud-zuul</module>
         <module>framework-import-excel</module>
         <module>framework-shard</module>
+        <module>framework-phoenix</module>
     </modules>
     <properties>
         <jdk.version>1.8</jdk.version>
@@ -200,6 +201,11 @@
             <dependency>
                 <groupId>com.framework.concise</groupId>
                 <artifactId>framework-auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.framework.concise</groupId>
+                <artifactId>framework-phoenix</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -3,7 +3,7 @@ package com.framework.shard;
 /**
  * 切片异常特殊处理
  * @author lyq
- *
+ * @date 2020年8月14日 下午7:44:19
  */
 public class ShardDbException extends RuntimeException {
 
