@@ -6,7 +6,6 @@ import java.io.Serializable;
 
 /**
  * 实体对象接口
- * @date 2012-9-8
  */
 public interface IBaseEntity extends Serializable  {
 	/**

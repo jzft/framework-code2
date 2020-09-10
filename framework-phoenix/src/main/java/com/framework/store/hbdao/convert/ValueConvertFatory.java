@@ -12,7 +12,6 @@ public final class ValueConvertFatory {
 	 * 
 	 * 将值转换指定类型
 	 * @author lyq
-	 * @date 2020年8月31日 下午6:34:32 
 	 * @param clazz
 	 * @param value
 	 * @param format

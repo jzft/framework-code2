@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author lyq
- * @date 2020年9月1日 上午10:44:38 
+ * @date 2020年9月1日 
  */
 @Configuration
 public class PhoenixConfig {

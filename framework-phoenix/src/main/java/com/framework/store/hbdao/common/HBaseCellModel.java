@@ -4,7 +4,6 @@ package com.framework.store.hbdao.common;
 
 /**
  * hbase查询结果列单元模型
- * @since 2013-2-16
  */
 public class HBaseCellModel {
 	

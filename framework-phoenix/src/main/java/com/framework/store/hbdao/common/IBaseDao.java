@@ -9,7 +9,6 @@ import com.framework.store.hbdao.common.entity.IBaseEntity;
 /**
  * 数据访问层接口定义
  * 
- * @date 2012-9-8
  */
 public interface IBaseDao {
 	/**
