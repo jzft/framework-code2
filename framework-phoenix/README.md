@@ -13,9 +13,9 @@
 ·hadoop2.8.5
 ·hbase1.4.13
 ·apche-phoenix-4.15.0-HBase-1.4
-（本人对其几个版本集群都试过，hadoop(2.7.1+hbase2、hbase1.1+phoenix5.0、phoenix5.0、4.14等，效果不是那么好，集成phoenix经常报类找不到，个人感觉以上在hbase1.4当中，以上版本是最好的集群了）</br>
-还有一个版本集成成功的版本：hadoop2.7.1、hbase1.1.4、phoenix4.8，太老了不建议用。</br>
-hbase基于lsm树，新增数据快，如果使用hbase2，新增会更快，我没用过。</br>
+（对其几个版本集群都试过，hadoop(2.7.1+hbase2、hbase1.1+phoenix5.0、phoenix5.0、4.14等，效果不是那么好，集成phoenix经常报类找不到，个人感觉以上在hbase1.4当中，以上版本是最好的版本集群了）<br/>
+还有一个版本集成成功的版本：hadoop2.7.1、hbase1.1.4、phoenix4.8，太老了不建议用。<br/>
+hbase基于lsm树，新增数据快，如果使用hbase2，新增会更快，我没用过。<br/>
 hive建phoenix外表的时候是没有apche-phoenix-4.15.0依赖包的，使用apche-phoenix-4.14.0的jar就行了。
 
 ###第一步：springboot文件注入配置'phoenix.entitys[0]=com.test.XXEntity'

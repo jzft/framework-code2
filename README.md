@@ -11,6 +11,7 @@
 *  #整合activiti设计 <br/>
 * redis缓存。 <br/>
 * 数据库持久层mybatis。 <br/>
+* hbase持久层<br/>
 .... <br/>
 
 后续完善....
