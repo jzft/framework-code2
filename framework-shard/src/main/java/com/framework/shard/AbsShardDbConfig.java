@@ -57,7 +57,6 @@ public class AbsShardDbConfig {
 			if(dataSource==null){
 				dataSource = new ShardDataSource();
 				dataSource.setKey(target);
-//				dataSource.setDefaultAutoCommit(true);
 				if(applicationContextTmp.getAutowireCapableBeanFactory() instanceof SingletonBeanRegistry){
 					SingletonBeanRegistry singletonBeanRegistry = (SingletonBeanRegistry)applicationContextTmp.getAutowireCapableBeanFactory();
 					singletonBeanRegistry.registerSingleton("datasource-"+target, dataSource);

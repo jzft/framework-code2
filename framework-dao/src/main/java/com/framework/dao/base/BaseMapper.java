@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
 
+
+
 public interface BaseMapper<T, TExample> {
 
-	int countByExample(TExample example);
+	Long countByExample(TExample example);
 
 	int deleteByExample(TExample example);
 
@@ -26,7 +28,6 @@ public interface BaseMapper<T, TExample> {
 
 	List<T> selectByExample(TExample example);
 
-	T selectByPrimaryKey(Integer id);
 
 	int updateByExampleSelective(@Param("record") T record, @Param("example") TExample example);
 
@@ -37,5 +38,18 @@ public interface BaseMapper<T, TExample> {
 	int updateByPrimaryKeySelective(T record);
 
 	int updateByPrimaryKeyWithBLOBs(T record);
+	
+
+
+    T selectByPrimaryKey(Integer id);
+
+	 /**
+     * 这是Mybatis Generator拓展插件生成的方法(请勿删除).
+     * This method corresponds to the database table s_task_templete
+     *
+     * @mbg.generated
+     * @author hewei
+     */
+    int batchInsert(@Param("list") List<T> list);
 
 }

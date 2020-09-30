@@ -33,7 +33,7 @@ public class PageUtil{
 		}
 
 		RowBounds rowBounds = new RowBounds((pageIndex - 1) * pageSize, pageSize);
-		int total = baseMapper.countByExample(example);
+		Long total = baseMapper.countByExample(example);
 		List<T> pageList = null;
 		if (blob) {
 			pageList = baseMapper.selectByExampleWithBLOBsWithRowbounds(example,rowBounds);

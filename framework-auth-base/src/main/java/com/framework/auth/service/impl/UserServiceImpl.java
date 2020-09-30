@@ -1,20 +1,13 @@
 package com.framework.auth.service.impl;
 
 
-import com.framework.auth.mapper.RoleEntityMapper;
-import com.framework.auth.mapper.UserEntityMapper;
-import com.framework.auth.pojo.dto.user.RegisterUserDTO;
-import com.framework.auth.pojo.dto.user.UserInfoDTO;
-import com.framework.auth.pojo.dto.user.UserRoleInfoDTO;
-import com.framework.auth.pojo.entity.RoleEntity;
-import com.framework.auth.pojo.entity.RoleEntityExample;
-import com.framework.auth.pojo.entity.UserEntity;
-import com.framework.auth.pojo.entity.UserRoleEntity;
-import com.framework.auth.service.UserRoleService;
-import com.framework.auth.service.UserService;
-import com.framework.cache.RedisHelper;
-import com.framework.security.AESHashedMatcher;
-import com.framework.auth.util.KeyConstants;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +16,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.framework.auth.mapper.RoleEntityMapper;
+import com.framework.auth.mapper.UserEntityMapper;
+import com.framework.auth.pojo.dto.user.RegisterUserDTO;
+import com.framework.auth.pojo.dto.user.UserInfoDTO;
+import com.framework.auth.pojo.dto.user.UserRoleInfoDTO;
+import com.framework.auth.pojo.entity.RoleEntity;
+import com.framework.auth.pojo.entity.RoleEntityExample;
+import com.framework.auth.pojo.entity.UserEntity;
+import com.framework.auth.pojo.entity.UserEntityExample;
+import com.framework.auth.pojo.entity.UserRoleEntity;
+import com.framework.auth.service.UserRoleService;
+import com.framework.auth.service.UserService;
+import com.framework.auth.util.KeyConstants;
+import com.framework.cache.RedisHelper;
+import com.framework.security.AESHashedMatcher;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,12 +68,29 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public RegisterUserDTO register(RegisterUserDTO dto){
-    	Integer userId = this.saveOrUpdateUser(dto.getUserInfo());
+    	if(dto.getUserInfo()==null||dto.getUserInfo().getUsername()==null){
+    		dto.setStatus(0);
+    		dto.setMsg("账号不能为空");
+    		return dto;
+    	}
+    	UserEntityExample example = new UserEntityExample();
+    	example.createCriteria().andUserNameEqualTo(org.apache.commons.lang3.StringUtils.trim(dto.getUserInfo().getUsername()));
     	
+		Integer count = this.userEntityMapper.countByExample(example );
+		if(count>0){
+			dto.setStatus(0);
+			dto.setMsg("账号已存在。");
+			return dto;
+		}
+    	Integer userId = this.saveOrUpdateUser(dto.getUserInfo());
+    	List<Integer> roleIds = new ArrayList<>();
+    	roleIds.add(3);
+		dto.setRoleIds(roleIds );
     	UserRoleInfoDTO userRoleInfoDTO = new UserRoleInfoDTO();
     	userRoleInfoDTO.setRoleIds(dto.getRoleIds());
     	userRoleInfoDTO.setUserId(userId);
 		this.rebindingRole_(userRoleInfoDTO );
+		dto.setStatus(1);
     	return dto;
     }
     
@@ -106,7 +127,14 @@ public class UserServiceImpl implements UserService {
 		if (entity.getId() != null) {
 		    userEntityMapper.updateByPrimaryKey(entity);
 		} else {
+//			List<UserRoleEntity> target = new ArrayList<UserRoleEntity>();
+//			UserRoleEntity userRole = new UserRoleEntity();
+//			userRole.setCreatedDatetime(new Date());
+//			userRole.setDeleteFlag(false);
+//			userRole.setRoleId(3);
 		    userEntityMapper.insertSelective(entity);
+//		    userRole.setUserId(entity.getId());
+//		    userRoleService.saveBatch(target );
 		}
 		return entity.getId();
 	}
@@ -145,6 +173,8 @@ public class UserServiceImpl implements UserService {
 		    UserRoleEntity entity = new UserRoleEntity();
 		    entity.setRoleId(roleId);
 		    entity.setUserId(userRoleInfoDTO.getUserId());
+		    entity.setCreatedDatetime(new Date());
+		    entity.setDeleteFlag(false);
 		    result.add(entity);
 		}
 		userRoleService.saveBatch(result);

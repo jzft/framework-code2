@@ -2,6 +2,7 @@ package com.framework.auth.api;
 
 import com.framework.auth.enums.ResultCodeEnum;
 import com.framework.auth.pojo.dto.role.RoleInfoDTO;
+import com.framework.auth.pojo.dto.user.RegisterUserDTO;
 import com.framework.auth.pojo.dto.user.UserInfoDTO;
 import com.framework.auth.pojo.dto.user.UserInfoListDTO;
 import com.framework.auth.pojo.dto.user.UserRoleInfoDTO;
@@ -45,13 +46,24 @@ public class SysUserController {
      * @param userInfoDTO 用户信息
      * @return 用户id
      */
-    @PostMapping("register")
+    @PostMapping("add")
     @ApiOperation(value = "添加用户")
     public ResultVo<Integer> add(@Valid @RequestBody UserInfoDTO userInfoDTO, Errors errors) {
         if (StringUtils.isEmpty(userInfoDTO.getPassword())) {
             return ResultVo.build(ResultCodeEnum.PARAMETER_ERROR.getCode(), "密码不能为空");
         }
         return ResultVo.build(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMsg(),userService.saveOrUpdate(userInfoDTO));
+    }
+    
+    @PostMapping("register")
+    @ApiOperation(value = "添加用户")
+    public ResultVo<RegisterUserDTO> register(@Valid @RequestBody UserInfoDTO userInfoDTO, Errors errors) {
+        if (StringUtils.isEmpty(userInfoDTO.getPassword())) {
+            return ResultVo.build(ResultCodeEnum.PARAMETER_ERROR.getCode(), "密码不能为空");
+        }
+        RegisterUserDTO dto = new RegisterUserDTO();
+        dto.setUserInfo(userInfoDTO);
+		return ResultVo.build(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMsg(),userService.register(dto ));
     }
 
     /**

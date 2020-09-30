@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Page<T> {
 
-	private int total = 0;
+	private Long total = 0L;
 
 	private int pageSize = 10;
 
@@ -29,11 +29,11 @@ public class Page<T> {
 		this.pageIndex = page;
 	}
 
-	public int getTotal() {
+	public long getTotal() {
 		return total;
 	}
 
-	public void setTotal(int total) {
+	public void setTotal(long total) {
 		this.total = total;
 	}
 
@@ -54,7 +54,7 @@ public class Page<T> {
 	}
 
 	public int getTotalPage() {
-		totalPage = (total + pageSize - 1) / pageSize;
+		totalPage = Integer.parseInt(((total + pageSize - 1) / pageSize)+"");
 		return totalPage;
 	}
 
