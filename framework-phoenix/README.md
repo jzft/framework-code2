@@ -25,4 +25,6 @@ hive建phoenix外表的时候是没有apche-phoenix-4.15.0依赖包的，使用a
 ·配置环境变量如JAVA_HOME。
 ·配置hosts文件，指定hbase的zookeeper、master、regionserver的地址映射。
 
-### 使用BasePhoenixBaseDao 类，新增查询phoenix数据。
+### 第三步使用；
+* 自动建表;已经对表及字段命名规则特殊处理，可以跟hive外表无缝整合。
+* 使用BasePhoenixBaseDao 类，新增、查询、修改、删除hbase数据。

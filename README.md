@@ -22,11 +22,11 @@
 * springcloud 通过maven引用最小单元jar
 * redis缓存。 <br/>
 * 数据库持久层mybatis。 <br/>
-* hbase持久层<br/>
+* hbase持久层phoenix框架<br/>
 .... <br/>
 
 持续完善....
 
 ## 使用
-打包到nexus私服，通过maven引入相关组件jar
+打包到nexus私服,或者导入代码，依赖父级工程，导入相关依赖包
 
