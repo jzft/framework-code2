@@ -20,7 +20,7 @@
 * excel通用导入<br/>
 * 分库模块<br/>
 * springcloud 通过maven引用最小单元jar
-* redis缓存。 <br/>
+* redis持久层工具包。 <br/>
 * 数据库持久层mybatis。 <br/>
 * hbase持久层phoenix框架<br/>
 .... <br/>
