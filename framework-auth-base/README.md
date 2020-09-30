@@ -8,7 +8,8 @@
 
 ### spring ioc
 
-扫描的包路径要添加：com.framework.auth
+* 扫描的包路径要添加：com.framework.auth
+* 数据库导入framework-auth下RBAC.sql文件,建立相应的表。
 
 ### mybatis
 
