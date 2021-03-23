@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>	
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<classPathEntry location="./bin/mysql-connector-java-5.1.34.jar" />
+	<!-- <classPathEntry location="./lib/sqljdbc4-4.0.jar" /> -->
+
+	<context id="prod">
+		<!-- RowBounds pagination -->
+		<plugin type="org.mybatis.generator.plugins.RowBoundsPlugin" />
+		<plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin" />
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+		<!-- 批量插入插件 -->
+		<!-- <plugin type="com.itfsw.mybatis.generator.plugins.BatchInsertPlugin"/>
+		<plugin type="com.itfsw.mybatis.generator.plugins.LogicalDeletePlugin"/> -->
+		
+		
+		<commentGenerator>
+			<property name="suppressDate" value="true" />
+			<property name="suppressAllComments" value="true" />
+		</commentGenerator>
+		<!-- 数据库连接信息 -->
+
+			<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://192.168.2.242:3306/ejoyst_dev?useUnicode=true&amp;characterEncoding=UTF-8"
+			userId="ejoystdb" password="Uml4ome88ddFV4QewMpv" />
+		<!-- entity跟example位置 -->
+		<javaModelGenerator targetPackage="com.test.pojo"
+			targetProject="src/main/java" />
+		<!-- xml位置 -->
+		<sqlMapGenerator targetPackage="/mapper"
+			targetProject="src/main/resources" />
+		<!-- 接口位置 -->
+		<javaClientGenerator targetPackage="com.test.mapper"
+			targetProject="src/main/java" type="XMLMAPPER">
+
+			<property name="enableSubPackages" value="false" />
+			<!-- <property name="rootInterface" value="com.framework.db.BaseMapper" /> -->
+		</javaClientGenerator>
+		<table tableName="abc" domainObjectName="AbcEntity">
+			<generatedKey column="id" sqlStatement="MYSQL" identity="true" />
+		</table>
+		<table tableName="bcd" domainObjectName="BcdEntity">
+			<generatedKey column="id" sqlStatement="MYSQL" identity="true" />
+		</table>
+	</context>
+</generatorConfiguration>

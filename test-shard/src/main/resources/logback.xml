@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!--脱敏处理-->
+	<!-- <conversionRule conversionWord="msg" converterClass="SensitiveLogConverter"></conversionRule> -->
+	<!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 -->
+	<property name="LOG_HOME" value="/log" />
+
+	<appender name="service"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Prudent>true</Prudent>
+		<File>${LOG_HOME}/project.log</File>
+		<encoder>
+			<pattern>%-4relative [%d{yyyy-MM-dd HH:mm:ss}] [%thread] %c line:%L
+				%-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+		<!--日志文件最大的大小-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>100MB</MaxFileSize>
+        </triggeringPolicy>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名-->
+			<fileNamePattern>
+				${LOG_HOME}/project.log.%d{yyyy-MM-dd}
+			</fileNamePattern>
+			<!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+		</rollingPolicy>
+	</appender>
+
+
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+		<Target>System.out</Target>
+		<encoder>
+			<pattern>%-4relative [%d{yyyy-MM-dd HH:mm:ss}] [%thread] %c line:%L
+				%-5level %logger{35} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	
+	
+
+	<logger name="com.alibaba.druid" level="debug" additivity="false"/>
+
+	<logger name="org.apache.phoenix" level="error" additivity="false"/>
+
+	<logger name="com.gargoylesoftware" level="error" additivity="false"/>
+	<logger name="service" level="info" additivity="false">
+		<appender-ref ref="service" />
+		<appender-ref ref="stdout" />
+	</logger>
+	
+	
+
+	<root level="debug">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="service" />
+	</root>
+</configuration>

@@ -1,0 +1,114 @@
+﻿<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>test-shard</groupId>
+  <artifactId>test-shard</artifactId>
+  <name>test-shard</name>
+  <parent>
+        <groupId>com.framework.concise</groupId>
+        <artifactId>concise</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <mainClass>com.test.MainApp</mainClass>
+        <webclient.version>2.26.8</webclient.version>
+        <htmlunit.version>2.35.0</htmlunit.version>
+    </properties>
+    <dependencies>
+		<!-- <dependency>
+			<groupId>crawl-pojo</groupId>
+			<artifactId>crawl-pojo</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+       <dependency>
+	         <groupId>mysql</groupId>
+	         <artifactId>mysql-connector-java</artifactId>
+	         <exclusions>
+	          
+	        <!--  phoenix不兼容高版本 -->
+	         	<exclusion>
+	         		<artifactId>protobuf-java</artifactId>
+	         		<groupId>com.google.protobuf</groupId>
+	         	</exclusion>
+	         </exclusions>
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.boot</groupId> 
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+		 <dependency>
+	      <groupId>org.springframework.boot</groupId>
+	      	<artifactId>spring-boot-starter-aop</artifactId>
+   		 </dependency>
+	    <dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-web</artifactId>
+		    
+		</dependency>
+        
+<!--         <dependency>
+            <groupId>com.framework.concise</groupId>
+            <artifactId>framework-auth-base</artifactId>
+        </dependency> -->
+        <dependency>
+            <groupId>com.framework.concise</groupId>
+            <artifactId>framework-utils</artifactId>
+        </dependency>
+    	 <dependency>
+            <groupId>com.framework.concise</groupId>
+            <artifactId>framework-shard</artifactId>
+        </dependency>
+		<dependency>
+            <groupId>com.framework.concise</groupId>
+            <artifactId>framework-cache</artifactId>
+        </dependency>
+<!--          <dependency>
+             <groupId>com.framework.concise</groupId>
+             <artifactId>framework-phoenix</artifactId>
+         </dependency> -->
+
+	  	<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-test</artifactId>
+		    <scope>test</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.giant</groupId>
+			<artifactId>giant-htmlunit</artifactId>
+			<version>${webclient.version}</version>
+			<scope>compile</scope>
+		</dependency> -->
+  		
+  		<!--  <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <optional>true</optional>
+        </dependency> -->
+    </dependencies>
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+			<plugin>
+				<groupId>org.mybatis.generator</groupId>
+				<artifactId>mybatis-generator-maven-plugin</artifactId>
+				<version>1.3.2</version>
+				<configuration>
+					<overwrite>true</overwrite>
+					<configurationFile>${project.basedir}/bin/mybatis-generator-config.xml</configurationFile>
+				</configuration>
+			</plugin> 
+        </plugins>
+    </build>
+</project>
