@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 
@@ -20,7 +21,7 @@ public class TranHolder {
 	 * PROPAGATION_NOT_SUPPORTED 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。
 	 * 
 	 */
-	public static ThreadLocal<Stack<String>> shadeStack = new ThreadLocal<Stack<String>>();
+	public static ThreadLocal<Stack<KeyValue<String, Object>>> shardStack = new ThreadLocal<Stack<KeyValue<String, Object>>>();
 	
 	
 }

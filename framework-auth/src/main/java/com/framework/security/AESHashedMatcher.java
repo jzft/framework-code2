@@ -112,7 +112,7 @@ public class AESHashedMatcher extends HashedCredentialsMatcher {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String e = new AESHashedMatcher().aesEncrypt("123456", "freight");
+		String e = new AESHashedMatcher().aesEncrypt("123123aa", "freight");
 		System.out.println(e);
 		String a = new AESHashedMatcher().aesDecrypt(e, "freight");
 		System.out.println(a);
@@ -172,4 +172,5 @@ public class AESHashedMatcher extends HashedCredentialsMatcher {
 	public void setEncryptKey(String encryptKey) {
 		this.encryptKey = encryptKey;
 	}
+	
 }

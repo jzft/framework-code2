@@ -183,9 +183,11 @@ public class ExcelFileUtil {
 		String strMessage=messageBuffer.toString();
 		if(!StringUtils.isBlank(strMessage)){
 			importMessage.append(messageBuffer);
+			vo.setMsg(importMessage.toString());
+			vo.setStatus(0);
+			return vo;
 		}
-		vo.setMsg(importMessage.toString());
-		vo.setStatus(0);
+		vo.setStatus(1);
 		return vo;
 	}
 	

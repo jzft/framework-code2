@@ -1565,20 +1565,19 @@ public class RedisHelper {
 
         /***单机start***/
 //			hostname = "120.25.226.230";
-        hostname = "localhost";
+        hostname = "8.129.113.173";
         port = "6379";
         JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
         connectionFactory.setPassword(password);
+        connectionFactory.setDatabase(5);
         connectionFactory.setHostName(hostname);
         connectionFactory.setPort(Integer.parseInt(port));
-        connectionFactory.setDatabase(1);
         /***单机end***/
         JedisPoolConfig config = new redis.clients.jedis.JedisPoolConfig();
         config.setMaxTotal(5000);
         config.setMaxIdle(200);
         config.setMaxWaitMillis(5000);
         config.setTestOnBorrow(true);
-
         connectionFactory.afterPropertiesSet();
         t.setConnectionFactory(connectionFactory);
         connectionFactory.setPoolConfig(config);
@@ -1588,7 +1587,8 @@ public class RedisHelper {
 //		for(int i = 1;i<11;i++){
 //			RedisHelper.lpush(key, i, 60);
 //		}
-        System.out.println(RedisHelper.lrange(key, -1, -1, Integer.class));
+        String aa = RedisHelper.hget("CURR_RANKS", "52", String.class);
+//        System.out.println(RedisHelper.lrange(key, -1, -1, Integer.class));
 
         Long start = System.currentTimeMillis();
 //		Set<String> keys = RedisHelper.keys("meta_pid_channelCode_type_ishot:452*");
@@ -1634,7 +1634,6 @@ public class RedisHelper {
 //		
 //		Integer i = RedisHelper.zrank("testSortSet:","呵呵");
 //		Integer i2 = RedisHelper.zrank("testSortSet:","呵");
-        System.out.println();
 
 
         //	Set<String> keys = RedisHelper.scan("AirportCode*", 2);

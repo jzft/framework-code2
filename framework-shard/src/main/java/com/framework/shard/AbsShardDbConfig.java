@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.session.LocalCacheScope;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -39,6 +40,9 @@ public class AbsShardDbConfig {
 	private ApplicationContext applicationContextTmp;
 	@Value("${batis.basePackages}")
 	String basePackages ;
+	@Value("${shard.tables}")
+	String shardTables;
+	
 	@SuppressWarnings("unchecked")
 	@Bean
 	@Primary
@@ -47,42 +51,60 @@ public class AbsShardDbConfig {
 		Map<String, ShardDataSource> targetDataSources = new HashMap<String, ShardDataSource>();
 //		targetDataSources.put(TranHolder.DEFAULT, datashard0());
 //		targetDataSources.put(TranHolder.T1, datashard1());
-		
-		Map<String, String> shardProp = shardProps();
+		ShardParamUtil.shardTables = shardTables;
+		Map shardProp = shardProps();
 		Map<String, String> parentProp = parentProps();
-		shardProp.forEach((key,value)->{
-			String target = StringUtils.substringBefore(key, ".");
-			String property = StringUtils.substringAfter(key, ".");
-			ShardDataSource dataSource = targetDataSources.get(target);
-			if(dataSource==null){
-				dataSource = new ShardDataSource();
-				dataSource.setKey(target);
-				if(applicationContextTmp.getAutowireCapableBeanFactory() instanceof SingletonBeanRegistry){
-					SingletonBeanRegistry singletonBeanRegistry = (SingletonBeanRegistry)applicationContextTmp.getAutowireCapableBeanFactory();
-					singletonBeanRegistry.registerSingleton("datasource-"+target, dataSource);
-				}
-				if(targetDataSources.isEmpty()){
-					dynamic.setDefaultTargetDataSource(dataSource);
-				}
-				targetDataSources.put(target, dataSource);
-				initDataSource(dataSource, parentProp);
-				
-			}
-			try {
-				org.apache.commons.beanutils.BeanUtils.setProperty(dataSource, property, value);
-			} catch (Exception e) {
-				throw new ShardDbException("数据源没有该属性："+target);
-			}
-		});
+		Object val = shardProp.values().iterator().next();
+		if(val instanceof Map){//低版本spring
+			Map<String,Map<String,String>>shardProp1 = shardProp;
+			shardProp1.forEach((target,map)->{
+				map.forEach((property,value)->{
+				loadShardPP(dynamic, targetDataSources, parentProp, target, property, value);
+				});
+			});
+		}else{
+			Map<String,String>shardProp2 = shardProp;
+			shardProp2.forEach((key,value)->{
+				String target = (String)StringUtils.substringBefore(key, ".");
+				String property = StringUtils.substringAfter(key, ".");
+				loadShardPP(dynamic, targetDataSources, parentProp, target, property, value);
+			});
+		}
 		dynamic.setTargetDataSources(((Map)targetDataSources));
 		return dynamic;
     }
+
+
+	private void loadShardPP(DynamicDataSource dynamic, Map<String, ShardDataSource> targetDataSources,
+			Map<String, String> parentProp, String target, String property, String value) {
+		ShardDataSource dataSource = targetDataSources.get(target);
+		if(dataSource==null){
+			dataSource = new ShardDataSource();
+			dataSource.setPoolPreparedStatements(false);
+			dataSource.setKey(target);
+				dataSource.setDefaultAutoCommit(false);
+			if(applicationContextTmp.getAutowireCapableBeanFactory() instanceof SingletonBeanRegistry){
+				SingletonBeanRegistry singletonBeanRegistry = (SingletonBeanRegistry)applicationContextTmp.getAutowireCapableBeanFactory();
+				singletonBeanRegistry.registerSingleton("datasource-"+target, dataSource);
+			}
+			if(targetDataSources.isEmpty()){
+				dynamic.setDefaultTargetDataSource(dataSource);
+			}
+			targetDataSources.put(target, dataSource);
+			initDataSource(dataSource, parentProp);
+		}
+		try {
+			org.apache.commons.beanutils.BeanUtils.setProperty(dataSource, property, value);
+		} catch (Exception e) {
+			throw new ShardDbException("数据源没有该属性："+target);
+		}
+	}
 	
 	
 	@ConfigurationProperties(prefix = "shard.datasource")
     @Bean
-    public Map<String, String> shardProps() {
-        return new <String, String>HashMap();
+    public Map shardProps() {
+        return new HashMap();
     }
 	
     /**
@@ -106,7 +128,15 @@ public class AbsShardDbConfig {
         for (String key : keys) {
 //			datasource.setMaxPoolPreparedStatementPerConnectionSize(maxPoolPreparedStatementPerConnectionSize);
             try {
-                org.apache.commons.beanutils.BeanUtils.setProperty(datasource, key, props.get(key));
+            	
+            	if("poolPreparedStatements".equals(key)){
+            		org.apache.commons.beanutils.BeanUtils.setProperty(datasource, key, false);//分表必须设置
+            	}else if("maxPoolPreparedStatementPerConnectionSize".equals(key)){
+            		org.apache.commons.beanutils.BeanUtils.setProperty(datasource, key, 0);//分表必须设置
+            	}else{
+            		org.apache.commons.beanutils.BeanUtils.setProperty(datasource, key, props.get(key));
+            	}
+                
             } catch (IllegalAccessException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -145,13 +175,14 @@ public class AbsShardDbConfig {
         Properties properties = new Properties();
         plugins[0].setProperties(properties);
         fb.setPlugins(plugins);
-        
-        return fb.getObject();
+        SqlSessionFactory factory = fb.getObject();
+        factory.getConfiguration().setLocalCacheScope(LocalCacheScope.STATEMENT);
+        return factory;
     }
 
     @Bean(name = "shardSqlSessionTemplate")
     public SqlSessionTemplate testSqlSessionTemplate2(@Qualifier("shardSqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
-        return new SqlSessionTemplate(sqlSessionFactory);
+    	return new SqlSessionTemplate(sqlSessionFactory);
     }
 
     /**

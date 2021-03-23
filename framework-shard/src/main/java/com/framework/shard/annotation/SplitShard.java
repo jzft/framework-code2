@@ -31,6 +31,12 @@ public @interface SplitShard {
 	 * 分库字段属性，如果是多级属性用property1.property2表示
 	 * @return
 	 */
-	String paramPropertyName() default "";
+	String splitPPName() default "";
+//	
+//	/**
+//	 * 分表字段，可不填
+//	 * @return
+//	 */
+//	String splitTablePPName() default "";
 	
 }

@@ -18,7 +18,7 @@
 当前功能有： 
 * 通用权限（RBAC）<br/>
 * excel通用导入<br/>
-* 分库模块<br/>
+* 分库分表模块<br/>
 * springcloud 通过maven引用最小单元jar
 * redis持久层工具包。 <br/>
 * 数据库持久层mybatis。 <br/>

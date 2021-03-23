@@ -23,9 +23,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 	 * @see org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource#determineCurrentLookupKey()
 	 */
 	protected Object determineCurrentLookupKey() {
-		Stack<String> stack = TranHolder.shadeStack.get();
-		if(stack!=null){
-			return stack.peek();
+		Stack<KeyValue<String,Object>> stack = TranHolder.shardStack.get();
+		if(stack!=null&&!stack.empty()){
+			return stack.peek().getKey();
 		}else{
 			return defaultTargetDataSource.getKey();
 		}

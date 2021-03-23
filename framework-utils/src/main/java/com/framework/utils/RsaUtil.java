@@ -20,12 +20,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 
 import org.apache.commons.lang3.StringUtils;
-
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -78,10 +76,10 @@ public class RsaUtil {
       StringBuilder sb = new StringBuilder();
       sb.append("<RSAKeyValue>")
       		  .append("<Modulus>")
-              .append(Base64.getEncoder().encode(pubKey.getModulus().toByteArray()))
+              .append(Base64Helper.encode(pubKey.getModulus().toByteArray()))
               .append("</Modulus>")
       		  .append("<Exponent>")
-              .append(Base64.getEncoder().encode(pubKey.getPublicExponent().toByteArray()))
+              .append(Base64Helper.encode(pubKey.getPublicExponent().toByteArray()))
               .append("</Exponent>");
       sb.append("</RSAKeyValue>");
       return sb.toString();
@@ -337,6 +335,7 @@ public class RsaUtil {
           keypair = keyGen.genKeyPair();
           privateKey = keypair.getPrivate();
           publicKey = keypair.getPublic();
+          
           // Get the bytes of the public and private keys
           byte[] privateKeyBytes = privateKey.getEncoded();
           byte[] publicKeyBytes = publicKey.getEncoded();
@@ -582,23 +581,33 @@ public class RsaUtil {
 	}
 	
 	public static void main(String[] args) {
-//		  RsaUtil.generateKeys(10);
+		  RsaUtil.generateKeys(10);
+		  System.out.println("---java privateKey---");
+		  System.out.println(RsaUtil.privateKeyStr);
+		  System.out.println("---java publicKey---");
+		  System.out.println(RsaUtil.publicKeyStr);
+		  System.out.println("---.net privateKey---");
+		  System.out.println(RsaUtil.encodePrivateKeyToXml(RsaUtil.privateKey));
+		  System.out.println("---.net publicKey---");
+		  System.out.println(RsaUtil.encodePublicKeyToXml(RsaUtil.publicKey));
 //		  System.out.println(RsaUtil.publicKeyStr);
-		  String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCEsmliwpUOfTrKwhMtuDKQBZu7plHgPCQDo4cR";
-		  publicKey +="aqpR3XSdc4qGPm7L1B/CM5FY8XILscnzmWqArRXPfogsVe8TvL65nExqJYmZ1v3AXOhMGOxoO8pB";
-		  publicKey +="K8unHxcWEFM5AtVYABFw5jXdK2avZh2Ne2eU8N9oaq++t01RjUXLv5zP0wIDAQAB";
-		  for(int i=0;i<100;i++){
-			  Long start = System.currentTimeMillis();
-		  String sb = RsaUtil.encode(publicKey, "baidu");
-		  System.out.println(System.currentTimeMillis() - start);
+//		  String publicKey = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCEsmliwpUOfTrKwhMtuDKQBZu7plHgPCQDo4cR";
+//		  publicKey +="aqpR3XSdc4qGPm7L1B/CM5FY8XILscnzmWqArRXPfogsVe8TvL65nExqJYmZ1v3AXOhMGOxoO8pB";
+//		  publicKey +="K8unHxcWEFM5AtVYABFw5jXdK2avZh2Ne2eU8N9oaq++t01RjUXLv5zP0wIDAQAB";
+
+		  String sb = RsaUtil.encode(RsaUtil.publicKeyStr, "baidu");
+//		  System.out.println(System.currentTimeMillis() - start);
+		  System.out.println("=============start==============");
 		  System.out.println(sb);
-		  }
+		  System.out.println(RsaUtil.decode(privateKeyStr, sb));
+		  System.out.println("=============end==============");
+
 //		  System.out.println("===========================");
 		
 //		  System.out.println("===========================");
 		  
 //		  System.out.println(RsaUtil.privateKeyStr);
-		  System.out.println("===========================");
+		  
 		  
 		 
 		  

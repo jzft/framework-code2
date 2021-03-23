@@ -19,6 +19,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.framework.shard.DynamicDataSource;
+import com.framework.shard.KeyValue;
 import com.framework.shard.ShardDataSource;
 import com.framework.shard.ShardDbException;
 import com.framework.shard.TranHolder;
@@ -56,7 +57,7 @@ public class TransAop {
     
     @Around("@annotation(shadeAnnotation)")
     public Object doShardAround(ProceedingJoinPoint  joinPoint,Shard shadeAnnotation) throws Throwable {
-		Stack<String> stack = TranHolder.shadeStack.get();
+		Stack<KeyValue<String,Object>> stack = TranHolder.shardStack.get();
 		MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 	    Method method = methodSignature.getMethod();
 //	    System.out.println("method:"+method.getName());
@@ -68,12 +69,12 @@ public class TransAop {
 //		    	pushStack(stack, datasource.getDefaultTargetDataSource().getKey());
 //		    	isPush = true;
 		    }else if(splitShadeAnnotation!=null){
-		    	throw new ShardDbException("@Shade和@SplitShade不能同时使用");
+		    	throw new ShardDbException("@Shard和@SplitShard不能同时使用");
 		    }else{
 		    	String shade = datasource.getDefaultTargetDataSource().getKey();
 	    		shade = ((Shard)shadeAnnotation).value();
     			shade = StringUtils.isEmpty(shade)?datasource.getDefaultTargetDataSource().getKey():shade;
-    			stack = pushStack(stack, shade);
+    			stack = pushStack(stack, shade,null);
 		    	isPush = true;
 //		    	 System.out.println("shade:"+shade);
 		    }
@@ -84,14 +85,14 @@ public class TransAop {
 	    		stack.pop();
 	    	}
 	    	if(stack!=null&&stack.empty()){
-	    		TranHolder.shadeStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
+	    		TranHolder.shardStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
 	    	}
 	    }
 	 }
     
 	@Around("@annotation(splitShadeAnnotation)")
 	public Object doSplitShardAroud(ProceedingJoinPoint  joinPoint,SplitShard splitShadeAnnotation) throws Throwable {
-		Stack<String> stack = TranHolder.shadeStack.get();
+		Stack<KeyValue<String,Object>> stack = TranHolder.shardStack.get();
 		MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 	    Method method = methodSignature.getMethod();
 //	    System.out.println("method:"+method.getName());
@@ -103,34 +104,37 @@ public class TransAop {
 //		    	pushStack(stack, datasource.getDefaultTargetDataSource().getKey());
 //		    	isPush = true;
 		    }else if(shadeAnnotation!=null){
-		    	throw new ShardDbException("@Shade和@SplitShade不能同时使用");
+		    	throw new ShardDbException("@Shard和@SplitShard不能同时使用");
 		    }else {
 		    	if(datasource==null||MapUtils.isEmpty(datasource.getTargetDataSources())){
 		    		throw new ShardDbException("属性文件shards-db.properties未设置数据源，或者spring容器不存在AbsShardDbConfig对象。");
 		    	}
 		    	String shade = datasource.getDefaultTargetDataSource().getKey();
 		    	if(joinPoint.getArgs()==null||joinPoint.getArgs().length==0){
-		    		throw new ShardDbException("使用@SplitShade 必须匹配分库参数。");
+		    		throw new ShardDbException("使用@SplitShard 必须匹配分库参数。");
 		    	}
 		    	
-	    	   Object splitParam = joinPoint.getArgs()[splitShadeAnnotation.paramPosition()];
-	    	   if(splitParam==null){
+	    	   Object splitObj = joinPoint.getArgs()[splitShadeAnnotation.paramPosition()];
+	    	   Object hitValue;
+	    	   if(splitObj==null){
 	    		  throw new ShardDbException(String.format("属性：%s 不能为空",method.getParameters()[splitShadeAnnotation.paramPosition()].getName()));
 	    	   }
-	    	   if(StringUtils.isEmpty(splitShadeAnnotation.paramPropertyName())){
-	    		   shade = getShortTableName(method.getParameters()[splitShadeAnnotation.paramPosition()].getName(), splitParam);
-	    	   }else{
+	    	   if(StringUtils.isEmpty(splitShadeAnnotation.splitPPName())){//指定分库字段位置
+	    		   shade = getShortShard(method.getParameters()[splitShadeAnnotation.paramPosition()].getName(), splitObj);
+	    		   hitValue = splitObj;
+	    	   }else{//指定分库字段名称
 	    		   try{
-	    			   shade = getShortTableName(splitShadeAnnotation.paramPropertyName(),BeanUtils.getProperty(splitParam, splitShadeAnnotation.paramPropertyName()));
+	    			   hitValue = BeanUtils.getProperty(splitObj, splitShadeAnnotation.splitPPName());
+	    			   shade = getShortShard(splitShadeAnnotation.splitPPName(),hitValue);
 	    		   }catch(Exception e){
 	    			   if(e instanceof ShardDbException){
 	    				   throw e;
 	    			   }else{
-	    			   throw new ShardDbException("参数位置设置有误，请查看是否有该参数或者是否有getter方法",e);
+	    				   throw new ShardDbException("参数位置设置有误，请查看是否有该参数或者是否有getter方法",e);
 	    			   }
 	    		   }
 	    	   }
-	    	   stack = pushStack(stack, shade);
+	    	   stack = pushStack(stack, shade,hitValue);
 		       isPush = true;
 		    }
 		   return joinPoint.proceed();
@@ -140,14 +144,14 @@ public class TransAop {
 	    		stack.pop();
 	    	}
 	    	if(stack!=null&&stack.empty()){
-	    		TranHolder.shadeStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
+	    		TranHolder.shardStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
 	    	}
 	    }
 	 }
 	
 	@Deprecated
 	public Object doAround(ProceedingJoinPoint  joinPoint,SplitShard splitShard) throws Throwable {
-		Stack<String> stack = TranHolder.shadeStack.get();
+		Stack<KeyValue<String,Object>> stack = TranHolder.shardStack.get();
 		MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 	    Method method = methodSignature.getMethod();
 //	    System.out.println("method:"+method.getName());
@@ -164,7 +168,7 @@ public class TransAop {
 		    	String shade = datasource.getDefaultTargetDataSource().getKey();
 	    		shade = ((Shard)shadeAnnotation).value();
     			shade = StringUtils.isEmpty(shade)?datasource.getDefaultTargetDataSource().getKey():shade;
-    			stack = pushStack(stack, shade);
+    			stack = pushStack(stack, shade,null);
 		    	isPush = true;
 //		    	 System.out.println("shade:"+shade);
 		    }else if(splitShadeAnnotation!=null){
@@ -173,18 +177,21 @@ public class TransAop {
 		    	}
 		    	String shade = datasource.getDefaultTargetDataSource().getKey();
 		    	if(joinPoint.getArgs()==null||joinPoint.getArgs().length==0){
-		    		throw new ShardDbException("使用@SplitShade 必须匹配分库参数。");
+		    		throw new ShardDbException("使用@SplitShard 必须匹配分库参数。");
 		    	}
 		    	
-	    	   Object splitParam = joinPoint.getArgs()[splitShadeAnnotation.paramPosition()];
-	    	   if(splitParam==null){
+	    	   Object splitObj = joinPoint.getArgs()[splitShadeAnnotation.paramPosition()];
+	    	   Object hitValue = null;
+	    	   if(splitObj==null){
 	    		  throw new ShardDbException(String.format("属性：%s 不能为空",method.getParameters()[splitShadeAnnotation.paramPosition()].getName()));
 	    	   }
-	    	   if(StringUtils.isEmpty(splitShadeAnnotation.paramPropertyName())){
-	    		   shade = getShortTableName(method.getParameters()[splitShadeAnnotation.paramPosition()].getName(), splitParam);
+	    	   if(StringUtils.isEmpty(splitShadeAnnotation.splitPPName())){
+	    		   shade = getShortShard(method.getParameters()[splitShadeAnnotation.paramPosition()].getName(), splitObj);
+	    		   hitValue = splitObj;
 	    	   }else{
 	    		   try{
-	    			   shade = getShortTableName(splitShadeAnnotation.paramPropertyName(),BeanUtils.getProperty(splitParam, splitShadeAnnotation.paramPropertyName()));
+	    			   hitValue = BeanUtils.getProperty(splitObj, splitShadeAnnotation.splitPPName());
+	    			   shade = getShortShard(splitShadeAnnotation.splitPPName(),hitValue);
 	    		   }catch(Exception e){
 	    			   if(e instanceof ShardDbException){
 	    				   throw e;
@@ -193,10 +200,10 @@ public class TransAop {
 	    			   }
 	    		   }
 	    	   }
-	    	   stack = pushStack(stack, shade);
+	    	   stack = pushStack(stack, shade,null);
 		       isPush = true;
 		    }else{
-		    	throw new ShardDbException("@Shade和@SplitShade不能同时使用");
+		    	throw new ShardDbException("@Shard和@SplitShard不能同时使用");
 		    }
 		   return joinPoint.proceed();
 	    }finally{
@@ -205,28 +212,30 @@ public class TransAop {
 	    		stack.pop();
 	    	}
 	    	if(stack!=null&&stack.empty()){
-	    		TranHolder.shadeStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
+	    		TranHolder.shardStack.remove();//所有事物都已经执行完毕，销毁线程里面的对战容器
 	    	}
 	    }
 	 }
 
-	private Stack pushStack(Stack<String> stack, String shade) {
+	private Stack pushStack(Stack<KeyValue<String, Object>> stack, String shade,Object hitValue) {
 //		System.out.println("============="+shade);
 		if(stack==null){
-			stack = new Stack<String>();
-			TranHolder.shadeStack.set(stack);
+			stack = new Stack<KeyValue<String, Object>>();
+			TranHolder.shardStack.set(stack);
 		}
-		stack.push(shade);
+		
+		stack.push(new KeyValue(shade,hitValue));
 		return stack;
 	}
-	private String getShortTableName(String paramName, Object splitParam) {
-			String shortTableName = null;
+	private String getShortShard(String paramName, Object hitValue) {
+			String shardName = null;
 		//不包含对象属性
-		   if(splitParam instanceof String || splitParam instanceof Integer){
-			   String splitParamStr = StringUtils.lowerCase(splitParam+"");
-			   if(!splitParamStr.matches("^[a-z0-9]*$")){
-				   throw new ShardDbException(String.format("分库参数 %s 必须是整型或者字符[a-zA-Z]，%s 不正确",paramName,splitParam));
-			   }
+		   if(hitValue instanceof String || hitValue instanceof Integer){
+			   String hitValueStr = StringUtils.lowerCase(hitValue+"");
+
+//			   if(!hitValueStr.matches("^[a-z0-9]*$")){
+//				   throw new ShardDbException(String.format("分库参数 %s 必须是整型或者字符[a-zA-Z]，%s 不正确",paramName,hitValue));
+//			   }
 			   for(Entry<String, ShardDataSource >shard:this.datasource.getTargetDataSources().entrySet()){
 				   String scope = shard.getValue().getScope();
 				   String db = shard.getKey();
@@ -234,34 +243,40 @@ public class TransAop {
 					   //scope带‘-’为分表字段开头值范围分表
 					   String start = StringUtils.substringBefore(scope,"-") ;
 					   String end = StringUtils.substringAfter(scope,"-") ;
-					   if(StringUtils.compare(splitParamStr, start)>=0
-							   &&StringUtils.compare(splitParamStr, end)<=0){
-						   shortTableName = db;
-						   return shortTableName;
+					   if(StringUtils.compare(StringUtils.substring(hitValueStr, 0, StringUtils.length(start)), start)>=0
+							   &&StringUtils.compare(StringUtils.substring(hitValueStr, 0, StringUtils.length(end)),end )<=0){
+						   shardName = db;
+						   return shardName;
 					   }
-				   }else if(StringUtils.isAlpha(scope)&&StringUtils.startsWithIgnoreCase(splitParamStr, scope)){
-					   //scope字母开头分库
-					   if(!StringUtils.isAlpha(splitParamStr)){
-						   throw new ShardDbException(String.format("分库参数：%s 必须是字母，当前值为：%s",paramName,splitParamStr));
-					   }
-					   shortTableName = db;
-					   return shortTableName;
-				   }else if(StringUtils.isNumeric(scope)){
+				   }else if(StringUtils.startsWith(scope, "%")){
 					  //scope如果是数字，取余数
-					   if(!StringUtils.isNumeric(splitParamStr)){
-						   throw new ShardDbException(String.format("分库参数：%s 必须是数字，当前值为：%s",paramName,splitParamStr));
+					   if(!StringUtils.isNumeric(hitValueStr)){
+						   throw new ShardDbException(String.format("分库参数：%s 必须是数字，当前值为：%s",paramName,hitValueStr));
 					   }
-					  if(NumberUtils.toInt(scope)==NumberUtils.toInt(splitParamStr)%this.datasource.getTargetDataSources().size()){
-						  shortTableName = db;
-						   return shortTableName;
+					  String scopeNum = StringUtils.substringAfter(scope, "%");
+					  if(!StringUtils.isNumeric(scopeNum)){
+						   throw new ShardDbException(String.format("分库配置scope必须是数字，当前值为：%s",scopeNum));
+					   }
+					  
+					  if(NumberUtils.toInt(scopeNum)==NumberUtils.toInt(hitValueStr)%this.datasource.getTargetDataSources().size()){
+						   shardName = db;
+						   return shardName;
 					  }
 //					  throw new ShardDbException(String.format("分库参数：%s 的值： %s不能映射数据源",paramName,splitParamStr));
-				   }else{
-					   throw new ShardDbException(String.format("请核对数据 源： %s 的scope值是否正确",db,scope));
+				   }else if(StringUtils.startsWithIgnoreCase(hitValueStr, scope)){
+					   //scope字母开头分库
+//					   if(!StringUtils.isAlpha(hitValueStr)){
+//						   throw new ShardDbException(String.format("分库参数：%s 必须是字母，当前值为：%s",paramName,hitValueStr));
+//					   }
+					   shardName = db;
+					   return shardName;
 				   }
+//				   else{
+//					   throw new ShardDbException(String.format("请核对数据 源： %s 的scope值是否正确",db,scope));
+//				   }
 			   }
 			  
-			   throw new ShardDbException(String.format("分库参数：%s = %s 未能命中数据库，请常看配置",paramName,splitParamStr));
+			   throw new ShardDbException(String.format("分库参数：%s = %s 未能命中数据库，请常看配置",paramName,hitValueStr));
 		   }else{
 			   throw new ShardDbException(String.format("分库参数：%s 必须是整型或者字符[a-zA-Z]",paramName));
 		   }
