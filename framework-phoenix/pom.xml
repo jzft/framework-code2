@@ -12,7 +12,7 @@
   	<hibernate-jpa-2.0-api.version>1.0.1.Final</hibernate-jpa-2.0-api.version>
   	<fastjson.version>1.2.3</fastjson.version>
   	<commons-dbcp.version>1.4</commons-dbcp.version>
-  	<protobuf-java.version>2.5.0</protobuf-java.version>
+  	<protobuf-java.version>3.16.1</protobuf-java.version>
   </properties>
   <dependencies>
   	<!-- 集成phoenix-->
