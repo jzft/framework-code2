@@ -10,7 +10,7 @@
   <properties>
   	<phoenix.version>4.15.0-HBase-1.4</phoenix.version>
   	<hibernate-jpa-2.0-api.version>1.0.1.Final</hibernate-jpa-2.0-api.version>
-  	<fastjson.version>1.2.3</fastjson.version>
+  	<fastjson.version>1.2.83</fastjson.version>
   	<commons-dbcp.version>1.4</commons-dbcp.version>
   	<protobuf-java.version>2.5.0</protobuf-java.version>
   </properties>
